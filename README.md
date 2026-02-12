@@ -2,6 +2,30 @@
 
 AI Website Auditor jo website ko real browser me run karke UX/UI + functionality audit karta hai, phir simple Hinglish me result deta hai.
 
+## Blank page issue (root cause + fix)
+Aapke GitHub Pages URL par blank page ka main reason usually ye hota hai:
+1. Vite project build serve nahi ho raha (source files serve ho rahe hote hain, jaise `/index.tsx`).
+2. Project repo path ke hisaab se `base` path configure nahi hota.
+
+Is repo me dono fix add kar diye gaye:
+- Vite production base path configured (`/webai-auditor/`).
+- GitHub Actions workflow added jo `dist/` build ko direct Pages par deploy karta hai.
+- SPA fallback `404.html` bhi generate hota hai, taaki refresh pe blank/404 issue na aaye.
+
+## Architecture
+
+### Frontend (Vite + React)
+- URL input + loading + results view
+- Calls backend endpoint: `POST /api/audit`
+
+### Backend (Express + Playwright + Gemini)
+- Opens website in Playwright Chromium
+- Collects real page signals (buttons, links, meta, etc.)
+- Generates Bhai-style audit response via Gemini
+- If Playwright/Gemini unavailable: heuristic fallback
+
+## Local development
+
 ## Why your GitHub Pages site was blank
 GitHub Pages project URL (`https://<user>.github.io/webai-auditor/`) par Vite app blank isliye aa rahi thi kyunki production assets root path (`/assets/...`) se load ho rahe the. Ab Vite `base` properly `/webai-auditor/` set hai, to Pages par JS/CSS resolve ho jayega.
 
