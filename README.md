@@ -26,18 +26,34 @@ Is repo me dono fix add kar diye gaye:
 
 ## Local development
 
+## Why your GitHub Pages site was blank
+GitHub Pages project URL (`https://<user>.github.io/webai-auditor/`) par Vite app blank isliye aa rahi thi kyunki production assets root path (`/assets/...`) se load ho rahe the. Ab Vite `base` properly `/webai-auditor/` set hai, to Pages par JS/CSS resolve ho jayega.
+
+## Architecture
+
+### Frontend (Vite + React)
+- URL input + loading + results view
+- Calls backend endpoint: `POST /api/audit`
+- Deploy target: GitHub Pages / Vercel / Netlify
+
+### Backend (Express + Playwright + Gemini)
+- Opens website in Playwright Chromium
+- Collects real page signals (buttons, links, meta, etc.)
+- Generates Bhai-style audit response via Gemini
+- If `GEMINI_API_KEY` missing: falls back to heuristic report
+
+## Local development
+
 ### 1) Install
 ```bash
 npm install
 ```
 
 ### 2) Environment
-Create `.env`:
+Create `.env` (or shell env):
 ```bash
 GEMINI_API_KEY=your_key_here
 VITE_BACKEND_URL=http://localhost:8787
-# optional if repo name changes
-VITE_BASE_PATH=/webai-auditor/
 ```
 
 ### 3) Run full stack
@@ -50,27 +66,24 @@ npm run dev:full
 ## Production deployment
 
 ### Frontend on GitHub Pages
-Workflow file: `.github/workflows/deploy-pages.yml`
-
-- Push to `main` branch and workflow auto deploy karega.
-- GitHub repo settings me ensure karo:
-  - **Pages → Build and deployment → Source: GitHub Actions**
-
-Manual local Pages build check:
+1. Build frontend:
 ```bash
-npm run build:pages
+npm run build
 ```
+2. Deploy `dist/` to GitHub Pages branch/workflow.
+
+> `vite.config.ts` already sets `base: '/webai-auditor/'` for production.
 
 ### Backend on Render/Railway/Fly.io
 Start command:
 ```bash
 npm run start:backend
 ```
-Required env:
+Set env:
 - `PORT`
 - `GEMINI_API_KEY`
 
-Then frontend ko backend URL do:
+Then point frontend to backend:
 ```bash
 VITE_API_BASE_URL=https://your-backend-domain.com
 ```

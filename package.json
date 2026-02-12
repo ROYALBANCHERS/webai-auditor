@@ -10,8 +10,7 @@
     "dev:frontend": "vite",
     "dev:backend": "node backend/server.js",
     "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "start:backend": "node backend/server.js",
-    "build:pages": "vite build && cp dist/index.html dist/404.html"
+    "start:backend": "node backend/server.js"
   },
   "dependencies": {
     "@google/genai": "^1.41.0",
