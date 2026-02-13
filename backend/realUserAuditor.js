@@ -1,320 +1,229 @@
-// ============================================
-// REAL USER STYLE WEBSITE AUDITOR - Per Page Analysis
-// Like a real human browsing each page individually
-// Works with ANY tech stack - React, Vue, Angular, vanilla, AI-generated (v0, Claude, Cursor)
-// No AI dependency - pure technical analysis
-// ============================================
-
 import { chromium } from 'playwright';
 
 const normalizeUrl = (input) => {
-  const url = input.trim();
+  const url = String(input || '').trim();
+  if (!url) throw new Error('URL is required');
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   return `https://${url}`;
 };
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const severity = (kind = 'medium') => kind;
 
-// Main audit function
-export const auditWebsiteWithBrowser = async (inputUrl) => {
+const analyzePage = async (page, pageUrl, baseHost) => {
+  const consoleErrors = [];
+  const onConsole = (msg) => {
+    if (msg.type() === 'error') consoleErrors.push(msg.text());
+  };
+  page.on('console', onConsole);
+
+  const started = Date.now();
+  await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForTimeout(1000);
+
+  const data = await page.evaluate(() => {
+    const toText = (el) => (el?.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+    const title = document.title || '';
+    const metaDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
+    const canonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href') || '';
+    const viewport = !!document.querySelector('meta[name="viewport"]');
+    const ogTitle = !!document.querySelector('meta[property="og:title"]');
+    const h1Count = document.querySelectorAll('h1').length;
+
+    const buttonCandidates = Array.from(document.querySelectorAll('button, a[role="button"], input[type="submit"], input[type="button"]'));
+    const visibleButtons = buttonCandidates.filter((el) => {
+      const r = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return r.width > 8 && r.height > 8 && style.visibility !== 'hidden' && style.display !== 'none';
+    });
+    const buttonDetails = visibleButtons.slice(0, 20).map((el) => ({
+      label: toText(el) || el.getAttribute('aria-label') || '(unlabeled button)',
+      disabled: el.matches(':disabled') || el.getAttribute('aria-disabled') === 'true'
+    }));
+
+    const links = Array.from(document.querySelectorAll('a[href]'));
+    const loginLink = links.find((a) => /login|sign\s?in/i.test((a.textContent || '') + (a.getAttribute('href') || '')))?.getAttribute('href') || null;
+    const signupLink = links.find((a) => /sign\s?up|register|create\saccount/i.test((a.textContent || '') + (a.getAttribute('href') || '')))?.getAttribute('href') || null;
+
+    return {
+      title,
+      metaDescription,
+      canonical,
+      viewport,
+      ogTitle,
+      h1Count,
+      buttonsTotal: visibleButtons.length,
+      buttonDetails,
+      forms: document.querySelectorAll('form').length,
+      linksTotal: links.length,
+      loginLink,
+      signupLink,
+      hasPasswordInput: !!document.querySelector('input[type="password"]')
+    };
+  });
+
+  const buttonHealth = {
+    total: data.buttonsTotal,
+    working: data.buttonDetails.filter((b) => !b.disabled).length,
+    notWorking: data.buttonDetails.filter((b) => b.disabled).length,
+    details: data.buttonDetails.map((b) => `${b.disabled ? 'NOT WORKING' : 'WORKING'}: ${b.label}`)
+  };
+
+  const issues = [];
+  const goodPoints = [];
+
+  if (!data.title) issues.push({ title: 'Missing title tag', description: 'Page has no <title>.', severity: severity('high'), category: 'SEO' });
+  else goodPoints.push('Title tag is present');
+  if (!data.metaDescription) issues.push({ title: 'Missing meta description', description: 'Add a description meta tag.', severity: severity('medium'), category: 'SEO' });
+  if (!data.canonical) issues.push({ title: 'Missing canonical URL', description: 'Add canonical URL for SEO consistency.', severity: severity('low'), category: 'SEO' });
+  if (!data.ogTitle) issues.push({ title: 'Missing Open Graph tags', description: 'Add Open Graph tags for social sharing.', severity: severity('low'), category: 'SEO' });
+  if (!data.viewport) issues.push({ title: 'Missing viewport meta tag', description: 'Mobile rendering may be broken.', severity: severity('high'), category: 'Mobile' });
+  if (data.h1Count !== 1) issues.push({ title: 'Heading structure issue', description: `Expected 1 H1, found ${data.h1Count}.`, severity: severity('medium'), category: 'SEO' });
+
+  if (consoleErrors.length > 0) {
+    issues.push({ title: 'Console errors detected', description: `${consoleErrors.length} console errors found on page.`, severity: severity('high'), category: 'Functionality' });
+  } else {
+    goodPoints.push('No console errors detected during page visit');
+  }
+
+  const perfMs = Date.now() - started;
+  if (perfMs > 5000) issues.push({ title: 'Slow page load', description: `Load time ${perfMs}ms is high.`, severity: severity('medium'), category: 'Performance' });
+
+  const rating = Number(Math.max(1, 5 - (issues.length * 0.3)).toFixed(1));
+  page.off('console', onConsole);
+
+  return {
+    path: new URL(pageUrl).pathname || '/',
+    url: pageUrl,
+    loaded: true,
+    rating,
+    totalIssues: issues.length,
+    loadTime: perfMs,
+    consoleErrors,
+    buttons: buttonHealth,
+    seoMeta: {
+      title: data.title,
+      metaDescription: data.metaDescription,
+      canonical: data.canonical,
+      viewport: data.viewport,
+      ogTitle: data.ogTitle
+    },
+    authHints: {
+      loginLink: data.loginLink,
+      signupLink: data.signupLink,
+      hasPasswordInput: data.hasPasswordInput
+    },
+    analysis: {
+      seo: { issues: issues.filter((i) => i.category === 'SEO'), goodPoints, warnings: [] },
+      security: { issues: [], goodPoints: pageUrl.startsWith('https://') ? ['HTTPS enabled'] : [], warnings: [] },
+      performance: { issues: issues.filter((i) => i.category === 'Performance'), goodPoints: [], warnings: [] },
+      accessibility: { issues: [], goodPoints: [], warnings: [] },
+      mobile: { issues: issues.filter((i) => i.category === 'Mobile'), goodPoints: [], warnings: [] },
+      ux: { issues: [], goodPoints: [], warnings: [] },
+      ui: { issues: [], goodPoints: [], warnings: [] },
+      functionality: { issues: issues.filter((i) => i.category === 'Functionality'), goodPoints: [], warnings: [] }
+    },
+    issues,
+    goodPoints
+  };
+};
+
+const discoverPages = async (page, baseUrl, limit = 20) => {
+  const base = new URL(baseUrl);
+  const links = await page.evaluate(() => Array.from(document.querySelectorAll('a[href]')).map((a) => a.getAttribute('href')).filter(Boolean));
+  const seen = new Set(['/']);
+  for (const href of links) {
+    try {
+      const u = new URL(href, baseUrl);
+      if (u.host !== base.host) continue;
+      if (/\.(pdf|jpg|jpeg|png|gif|svg|zip|docx?)$/i.test(u.pathname)) continue;
+      seen.add(u.pathname || '/');
+    } catch {}
+  }
+  return Array.from(seen).slice(0, limit);
+};
+
+export const auditWebsiteWithBrowser = async (inputUrl, credentials = {}) => {
   const url = normalizeUrl(inputUrl);
-  let browser;
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  const page = await context.newPage();
 
+  const start = Date.now();
   const auditData = {
     url,
     startTime: new Date().toISOString(),
-    techStack: {},
     pages: [],
-    interactiveTests: {},
-    authTests: {},
+    pageAudits: [],
     issues: [],
     warnings: [],
     goodPoints: [],
     rating: 0,
     advice: '',
-    pageAudits: [] // NEW: Detailed per-page analysis with individual ratings
+    authTests: { hasLogin: false, hasSignup: false, loginPageAccessible: false, signupPageAccessible: false, socialLoginAvailable: false, issues: [], details: [] },
+    interactiveTests: { buttons: { total: 0, clickable: 0, working: 0, broken: 0, details: [] }, forms: { total: 0, working: 0, broken: 0, details: [] }, links: { total: 0, working: 0, broken: 0, details: [] }, navigation: { hasNav: false, menuItems: 0, mobileMenuWorks: false, details: [] }, modals: { found: 0, closable: 0, details: [] } },
+    techStack: { frameworks: [], libraries: [], analytics: [], cms: [], ecommerce: [], fonts: [] },
+    seoAnalysis: { issues: [], goodPoints: [], warnings: [] },
+    securityAnalysis: { issues: [], goodPoints: [], warnings: [] },
+    performanceAnalysis: { issues: [], goodPoints: [], warnings: [] },
+    accessibilityAnalysis: { issues: [], goodPoints: [], warnings: [] },
+    mobileAnalysis: { issues: [], goodPoints: [], warnings: [] },
+    uxAnalysis: { issues: [], goodPoints: [], warnings: [] },
+    uiAnalysis: { issues: [], goodPoints: [], warnings: [] },
+    functionalityAnalysis: { issues: [], goodPoints: [], warnings: [] }
   };
 
   try {
-    console.log(`\n${'='.repeat(60)}`);
-    console.log(`🔍 Starting COMPREHENSIVE TECH AUDIT for: ${url}`);
-    console.log(`👨 Acting like REAL HUMAN - testing each page individually`);
-    console.log(`${'='.repeat(60)}\n`);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    auditData.pages = await discoverPages(page, url, 20);
 
-    browser = await chromium.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    const context = await browser.newContext({
-      viewport: { width: 1920, height: 1080 },
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    });
-
-    const page = await context.newPage();
-    page.setDefaultTimeout(15000);
-
-    // STEP 1: Visit homepage and detect tech stack
-    console.log('📄 Loading homepage...');
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-    await sleep(3000);
-
-    console.log('🔧 Detecting tech stack (all frameworks)...');
-    auditData.techStack = await detectTechStack(page);
-    console.log(`   Found: ${auditData.techStack.frameworks.length} frameworks, ${auditData.techStack.libraries.length} libraries`);
-
-    // STEP 2: Discover all pages
-    console.log('\n🗺️ Discovering site pages...');
-    const discoveredPages = await discoverAllPages(page, url, 15);
-    auditData.pages = discoveredPages;
-
-    // Limit pages to test for detailed analysis (to keep audit time reasonable)
-    const pagesToTest = discoveredPages.slice(0, 8); // Test up to 8 pages
-
-    console.log(`\n👨 Will act like REAL HUMAN testing ${pagesToTest.length} pages individually...\n`);
-    console.log(`${'='.repeat(60)}\n`);
-
-    const pageAuditResults = [];
-
-    // Test EACH page with ALL analyses (SEO, Security, Performance, Accessibility, Mobile, UX, UI, Functionality)
-    for (let i = 0; i < pagesToTest.length; i++) {
-      const pagePath = pagesToTest[i];
+    for (const path of auditData.pages) {
+      const pageUrl = new URL(path, url).toString();
       try {
-        const pageUrl = new URL(pagePath, url).toString();
-        console.log(`\n📄 [${i + 1}/${pagesToTest.length}] Testing page: ${pagePath}`);
-        console.log(`${'='.repeat(40)}\n`);
-
-        // Navigate to page
-        await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
-        await sleep(2000);
-
-        // Run COMPLETE analysis on this specific page
-        const pageAnalysis = {};
-        let totalIssuesOnPage = 0;
-
-        // 1. SEO Analysis
-        console.log('   🔍 SEO check...');
-        const seoResult = await analyzeSEO(page);
-        pageAnalysis.seo = seoResult;
-        const seoIssues = seoResult.issues.length;
-        const seoGood = seoResult.goodPoints.length;
-        totalIssuesOnPage += seoIssues;
-        console.log(`      Issues: ${seoIssues}, Good: ${seoGood}`);
-
-        // 2. Security Analysis
-        console.log('   🔐 Security check...');
-        const securityResult = await analyzeSecurity(page, pageUrl);
-        pageAnalysis.security = securityResult;
-        const securityIssues = securityResult.issues.length;
-        const securityGood = securityResult.goodPoints.length;
-        totalIssuesOnPage += securityIssues;
-        console.log(`      Issues: ${securityIssues}, Good: ${securityGood}`);
-
-        // 3. Performance Analysis
-        console.log('   ⚡ Performance check...');
-        const perfResult = await analyzePerformance(page, pageUrl);
-        pageAnalysis.performance = perfResult;
-        const perfIssues = perfResult.issues.length;
-        const perfGood = perfResult.goodPoints.length;
-        totalIssuesOnPage += perfIssues;
-        console.log(`      Issues: ${perfIssues}, Good: ${perfGood}`);
-
-        // 4. Accessibility Analysis
-        console.log('   ♿ Accessibility check...');
-        const a11yResult = await analyzeAccessibility(page);
-        pageAnalysis.accessibility = a11yResult;
-        const a11yIssues = a11yResult.issues.length;
-        const a11yGood = a11yResult.goodPoints.length;
-        totalIssuesOnPage += a11yIssues;
-        console.log(`      Issues: ${a11yIssues}, Good: ${a11yGood}`);
-
-        // 5. Mobile Analysis
-        console.log('   📱 Mobile check...');
-        const mobileResult = await analyzeMobile(page, pageUrl);
-        pageAnalysis.mobile = mobileResult;
-        const mobileIssues = mobileResult.issues.length;
-        const mobileGood = mobileResult.goodPoints.length;
-        totalIssuesOnPage += mobileIssues;
-        console.log(`      Issues: ${mobileIssues}, Good: ${mobileGood}`);
-
-        // 6. UX Analysis
-        console.log('   👥 UX check...');
-        const uxResult = await analyzeUX(page);
-        pageAnalysis.ux = uxResult;
-        const uxIssues = uxResult.issues.length;
-        const uxGood = uxResult.goodPoints.length;
-        totalIssuesOnPage += uxIssues;
-        console.log(`      Issues: ${uxIssues}, Good: ${uxGood}`);
-
-        // 7. UI Analysis
-        console.log('   🎨 UI check...');
-        const uiResult = await analyzeUI(page);
-        pageAnalysis.ui = uiResult;
-        const uiIssues = uiResult.issues.length;
-        const uiGood = uiResult.goodPoints.length;
-        totalIssuesOnPage += uiIssues;
-        console.log(`      Issues: ${uiIssues}, Good: ${uiGood}`);
-
-        // 8. Functionality Analysis
-        console.log('   ⚙️ Functionality check...');
-        const funcResult = await analyzeFunctionality(page);
-        pageAnalysis.functionality = funcResult;
-        const funcIssues = funcResult.issues.length;
-        const funcGood = funcResult.goodPoints.length;
-        totalIssuesOnPage += funcIssues;
-        console.log(`      Issues: ${funcIssues}, Good: ${funcGood}`);
-
-        // Calculate individual page rating (0-5)
-        let pageRating = 5.0;
-
-        // Deduct for issues on THIS page (weighted by severity)
-        const issueWeights = {
-          critical: 2.0, high: 1.5, medium: 1.0, low: 0.5
-        };
-
-        [...seoResult.issues, ...securityResult.issues, ...perfResult.issues,
-         ...a11yResult.issues, ...mobileResult.issues, ...uxResult.issues,
-         ...uiResult.issues, ...funcResult.issues].forEach(issue => {
-          pageRating -= (issueWeights[issue.severity] || 0.5);
-        });
-
-        // Bonus for good points on THIS page
-        const totalGoodPoints = seoGood + securityGood + perfGood + a11yGood +
-                                   mobileGood + uxGood + uiGood + funcGood;
-        pageRating += Math.min(0.5, totalGoodPoints * 0.05);
-
-        // Ensure rating is between 1 and 5
-        pageRating = Math.max(1.0, Math.min(5.0, pageRating));
-        pageRating = Number(pageRating.toFixed(1));
-
-        console.log(`   ⭐ Page Rating: ${pageRating}/5 (${totalIssuesOnPage} total issues)\n`);
-
-        // Store this page's detailed analysis
-        pageAuditResults.push({
-          path: pagePath,
-          url: pageUrl,
-          loaded: true,
-          rating: pageRating,
-          totalIssues: totalIssuesOnPage,
-          analysis: pageAnalysis,
-          // Category breakdown for UI display
-          seo: { issues: seoIssues, goodPoints: seoGood, issuesCount: seoIssues.length },
-          security: { issues: securityIssues, goodPoints: securityGood, issuesCount: securityIssues.length },
-          performance: { issues: perfIssues, goodPoints: perfGood, issuesCount: perfIssues.length },
-          accessibility: { issues: a11yIssues, goodPoints: a11yGood, issuesCount: a11yIssues.length },
-          mobile: { issues: mobileIssues, goodPoints: mobileGood, issuesCount: mobileIssues.length },
-          ux: { issues: uxIssues, goodPoints: uxGood, issuesCount: uxIssues.length },
-          ui: { issues: uiIssues, goodPoints: uiGood, issuesCount: uiIssues.length },
-          functionality: { issues: funcIssues, goodPoints: funcGood, issuesCount: funcIssues.length }
-        });
-
+        const result = await analyzePage(page, pageUrl, new URL(url).host);
+        auditData.pageAudits.push(result);
+        auditData.issues.push(...result.issues.map((i) => ({ ...i, title: `[${result.path}] ${i.title}` })));
+        auditData.goodPoints.push(...result.goodPoints.map((g) => `[${result.path}] ${g}`));
+        if (result.authHints.loginLink) {
+          auditData.authTests.hasLogin = true;
+          auditData.authTests.loginPageAccessible = true;
+        }
+        if (result.authHints.signupLink) {
+          auditData.authTests.hasSignup = true;
+          auditData.authTests.signupPageAccessible = true;
+        }
       } catch (e) {
-        console.error(`   ❌ Error testing ${pagePath}:`, e.message);
-        pageAuditResults.push({
-          path: pagePath,
-          url: new URL(pagePath, url).toString(),
-          loaded: false,
-          rating: 0,
-          totalIssues: 999,
-          error: e.message
-        });
+        auditData.pageAudits.push({ path, url: pageUrl, loaded: false, error: e.message, errors: [e.message] });
+        auditData.issues.push({ title: `[${path}] Page failed to load`, description: e.message, severity: 'high', category: 'Functionality' });
       }
     }
 
-    // Store page audits in main data
-    auditData.pageAudits = pageAuditResults;
+    const loaded = auditData.pageAudits.filter((p) => p.loaded && p.rating);
+    auditData.rating = loaded.length ? Number((loaded.reduce((a, b) => a + b.rating, 0) / loaded.length).toFixed(1)) : 1.0;
 
-    // Calculate OVERALL rating as AVERAGE of all tested pages
-    const validPageRatings = pageAuditResults
-      .filter(p => p.loaded && p.rating > 0)
-      .map(p => p.rating);
+    auditData.interactiveTests.buttons.total = loaded.reduce((sum, p) => sum + (p.buttons?.total || 0), 0);
+    auditData.interactiveTests.buttons.working = loaded.reduce((sum, p) => sum + (p.buttons?.working || 0), 0);
+    auditData.interactiveTests.buttons.broken = loaded.reduce((sum, p) => sum + (p.buttons?.notWorking || 0), 0);
+    auditData.interactiveTests.buttons.clickable = auditData.interactiveTests.buttons.working;
+    auditData.interactiveTests.buttons.details = loaded.flatMap((p) => (p.buttons?.details || []).slice(0, 5)).slice(0, 40);
 
-    if (validPageRatings.length > 0) {
-      const sumRatings = validPageRatings.reduce((sum, r) => sum + r, 0);
-      auditData.rating = Number((sumRatings / validPageRatings.length).toFixed(1));
-      console.log(`\n${'='.repeat(60)}`);
-      console.log(`📊 OVERALL RATING: ${auditData.rating}/5 (average of ${validPageRatings.length} tested pages)\n`);
-    } else {
-      auditData.rating = 3.0;
-      console.log('\n📊 OVERALL RATING: 3.0/5 (no valid pages tested)\n');
+    if (auditData.authTests.hasLogin && !(credentials.username && credentials.password)) {
+      auditData.authTests.issues.push('Login page detected. Provide credentials to validate authenticated pages.');
+      auditData.authTests.details.push('Credentials were not supplied with this audit request.');
+    } else if (auditData.authTests.hasLogin) {
+      auditData.authTests.details.push('Credentials were supplied and are ready for authenticated flow testing.');
     }
 
-    // Collect ALL issues from ALL pages into main issues list with page prefix
-    pageAuditResults.forEach(pageAudit => {
-      if (pageAudit.analysis && pageAudit.loaded) {
-        Object.values(pageAudit.analysis || {}).forEach(analysis => {
-          if (analysis.issues) {
-            auditData.issues.push(...analysis.issues.map(issue => ({
-              title: `[${pageAudit.path}] ${issue.title}`,
-              description: issue.description,
-              severity: issue.severity,
-              category: issue.category
-            })));
-          }
-          if (analysis.goodPoints) {
-            auditData.goodPoints.push(...analysis.goodPoints.map(point => `[${pageAudit.path}] ${point}`));
-          }
-          if (analysis.warnings) {
-            auditData.warnings.push(...analysis.warnings.map(warning => ({
-              title: `[${pageAudit.path}] ${warning.title}`,
-              description: warning.description,
-              category: warning.category || 'General'
-            })));
-          }
-        });
-      }
-    });
-
-    // Test auth flow (on main page)
-    console.log('\n🔐 Testing login/signup flow...');
-    auditData.authTests = await testAuthFlow(page, url);
-
-    // Take screenshots
-    console.log('\n📸 Taking screenshots...');
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-    await sleep(1500);
-    const desktopScreenshot = await page.screenshot({ encoding: 'base64', fullPage: false });
-
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-    await sleep(1500);
-    const mobileScreenshot = await page.screenshot({ encoding: 'base64', fullPage: false });
-
-    auditData.screenshots = {
-      desktop: desktopScreenshot,
-      mobile: mobileScreenshot
-    };
-
-    // Generate advice
-    auditData.advice = generateComprehensiveAdvice(auditData);
-
+    auditData.advice = `Audited ${auditData.pages.length} total pages (${loaded.length} loaded successfully). Found ${auditData.issues.length} issues. Focus on SEO meta tags, console errors, and disabled/non-working buttons first.`;
     auditData.endTime = new Date().toISOString();
-    auditData.totalTime = Date.now() - Date.parse(auditData.startTime);
+    auditData.totalTime = Date.now() - start;
 
-    console.log(`\n${'='.repeat(60)}\n`);
-    console.log(`✅ AUDIT COMPLETE! Rating: ${auditData.rating}/5\n`);
-    console.log(`${'='.repeat(60)}\n`);
-
-  } catch (error) {
-    console.error('\n❌ Audit Error:', error);
-
-    auditData.issues = [{
-      title: 'Audit Failed',
-      description: `Could not complete audit: ${error.message}`,
-      severity: 'critical',
-      category: 'Functionality'
-    }];
-    auditData.rating = 1.0;
-    auditData.advice = 'Website appears to be down or blocking automated access. Please check if the site is live.';
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    auditData.screenshots = {
+      desktop: await page.screenshot({ encoding: 'base64', fullPage: false }),
+    };
   } finally {
-    if (browser) {
-      await browser.close();
-    }
+    await browser.close();
   }
 
   return auditData;
 };
-
-// Need to export all required functions
-export { detectTechStack, analyzeSEO, analyzeSecurity, analyzePerformance, analyzeAccessibility, analyzeMobile, analyzeUX, analyzeUI, analyzeFunctionality };

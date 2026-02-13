@@ -20,6 +20,7 @@ app.get('/api/health', (_req, res) => {
 // Main audit endpoint
 app.post('/api/audit', async (req, res) => {
   const url = String(req.body?.url || '').trim();
+  const credentials = req.body?.credentials || {};
 
   if (!url) {
     return res.status(400).json({ error: 'URL is required.' });
@@ -30,7 +31,7 @@ app.post('/api/audit', async (req, res) => {
     console.log(`🔍 NEW AUDIT REQUEST: ${url}`);
     console.log(`${'='.repeat(60)}`);
 
-    const report = await auditWebsiteWithBrowser(url);
+    const report = await auditWebsiteWithBrowser(url, credentials);
 
     // Store in history (in-memory for now)
     auditHistory.unshift({
@@ -51,7 +52,7 @@ app.post('/api/audit', async (req, res) => {
   } catch (error) {
     console.error('❌ Audit API Error:', error);
     return res.status(500).json({
-      error: 'Bhai audit karte time issue aa gaya. Thoda der baad try kar.',
+      error: 'Audit failed while processing this website. Please try again in a moment.',
       message: error.message
     });
   }

@@ -3,7 +3,7 @@ import { AdSpace } from '../AdSpace';
 
 export const HowItWorks: React.FC = () => {
   useEffect(() => {
-    document.title = "How It Works - Bhai Auditor";
+    document.title = "How It Works - WebAI Auditor";
   }, []);
 
   return (
@@ -34,14 +34,14 @@ export const HowItWorks: React.FC = () => {
            <div className="hidden md:flex absolute left-4 w-8 h-8 bg-black text-white rounded-full items-center justify-center font-bold -translate-x-1/2">3</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-3">Detailed Report</h3>
           <p className="text-gray-600 font-light">
-            We generate a clean, "Bhai-style" report that tells you exactly what to fix. From broken buttons to missing SEO tags.
+            We generate a clear report that tells you exactly what to fix, from broken buttons to missing SEO tags.
           </p>
         </div>
       </div>
 
       <div className="mt-16 bg-black text-white rounded-2xl p-8 text-center">
         <h2 className="text-2xl font-light mb-4">Ready to improve your site?</h2>
-        <p className="text-gray-400 mb-6">Join thousands of developers using Bhai Auditor.</p>
+        <p className="text-gray-400 mb-6">Join thousands of developers using WebAI Auditor.</p>
         <button className="bg-white text-black px-8 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">
           Audit Now
         </button>

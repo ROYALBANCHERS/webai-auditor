@@ -1,50 +1,25 @@
-import { AuditResult, AuditResultLegacy } from "../types";
+import { AuditResult, AuditResultLegacy } from '../types';
 
-// API base URL - connect to Render backend
-// In production, set VITE_BACKEND_URL to your Render backend URL
-// Example: https://webai-auditor-backend.onrender.com
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') ||
-                         import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
 
-console.log('API Base URL:', API_BASE_URL || 'using relative path');
-
-export const auditWebsite = async (url: string): Promise<AuditResult> => {
-  // Normalize URL
+export const auditWebsite = async (url: string, credentials?: { username?: string; password?: string }): Promise<AuditResult> => {
   const normalizedUrl = url.trim();
-  if (!normalizedUrl) {
-    throw new Error('URL is required');
-  }
+  if (!normalizedUrl) throw new Error('URL is required');
 
-  // Add protocol if missing
-  let fullUrl = normalizedUrl;
-  if (!normalizedUrl.match(/^https?:\/\//i)) {
-    fullUrl = `https://${normalizedUrl}`;
-  }
+  const fullUrl = normalizedUrl.match(/^https?:\/\//i) ? normalizedUrl : `https://${normalizedUrl}`;
 
-  console.log(`Starting audit for: ${fullUrl}`);
+  if (API_BASE_URL || !import.meta.env.PROD) {
+    const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/audit` : '/api/audit';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 180000);
 
-  // Try backend API first
-  if (API_BASE_URL || !import.meta.env.PROD)) {
     try {
-      const apiUrl = API_BASE_URL
-        ? `${API_BASE_URL}/api/audit`
-        : '/api/audit';
-
-      console.log(`Calling API: ${apiUrl}`);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout
-
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: fullUrl }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fullUrl, credentials }),
         signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -52,25 +27,11 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
       }
 
       const data = await response.json();
-      console.log('API response received:', data);
+      if ('techStack' in data || 'pageAudits' in data || 'authTests' in data || 'screenshots' in data) return data as AuditResult;
 
-      // Check if response has new format fields
-      if ('techStack' in data || 'pageAudits' in data || 'authTests' in data || 'screenshots' in data) {
-        // New format - already fully typed
-        return data as AuditResult;
-      }
-
-      // Legacy format - convert to new format
       return {
         ...data,
-        techStack: {
-          frameworks: [],
-          libraries: [],
-          analytics: [],
-          cms: [],
-          ecommerce: [],
-          fonts: []
-        },
+        techStack: { frameworks: [], libraries: [], analytics: [], cms: [], ecommerce: [], fonts: [] },
         pages: [],
         pageAudits: [],
         interactiveTests: {
@@ -79,7 +40,7 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
           links: { total: 0, working: 0, broken: 0, details: [] },
           navigation: { hasNav: false, menuItems: 0, mobileMenuWorks: false, details: [] },
           modals: { found: 0, closable: 0, details: [] }
-        }
+        },
         authTests: {
           hasLogin: false,
           hasSignup: false,
@@ -93,34 +54,17 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
         goodPoints: (data as AuditResultLegacy).highlights || []
       };
     } catch (error: any) {
-      console.error('API call failed:', error);
-
-      // If it's an abort error, it's a timeout
-      if (error.name === 'AbortError') {
-        throw new Error('Website took too long to respond. The audit is still running in the background. Please check back in a minute.');
-      }
-
-      // For network errors in production, show helpful message
-      if (import.meta.env.PROD && error.message?.includes('fetch')) {
-        throw new Error('Backend service is currently unavailable. Please try again later.');
-      }
-
+      if (error.name === 'AbortError') throw new Error('Website took too long to respond. Please try again.');
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
-  // Fallback for production without backend (show demo mode)
   return {
     url: fullUrl,
     auditDate: new Date().toISOString(),
-    techStack: {
-      frameworks: [],
-      libraries: [],
-      analytics: [],
-      cms: [],
-      ecommerce: [],
-      fonts: []
-    },
+    techStack: { frameworks: [], libraries: [], analytics: [], cms: [], ecommerce: [], fonts: [] },
     pages: [],
     pageAudits: [],
     interactiveTests: {
@@ -139,75 +83,22 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
       issues: [],
       details: []
     },
-    issues: [{
-      title: 'Demo Mode',
-      description: 'Backend server is not connected. Start the backend server to get real AI-powered audits.',
-      severity: 'medium',
-      category: 'Functionality'
-    }],
+    issues: [{ title: 'Demo Mode', description: 'Backend server is not connected. Start the backend for live audits.', severity: 'medium', category: 'Functionality' }],
     warnings: [],
-    goodPoints: ['Frontend is working', 'Ready to connect to backend'],
-    rating: 3.5,
-    advice: 'Backend server start karo: `npm run dev:backend`. Phir se audit try karo.',
+    goodPoints: ['Frontend is running'],
+    rating: 3.0,
+    advice: 'Start backend with `npm run dev:backend` and run the audit again.',
     screenshots: {},
     loadTime: 0
   };
 };
 
-// Health check for backend
 export const checkBackendHealth = async (): Promise<boolean> => {
   try {
-    const apiUrl = API_BASE_URL
-      ? `${API_BASE_URL}/api/health`
-      : '/api/health';
-
+    const apiUrl = API_BASE_URL ? `${API_BASE_URL}/api/health` : '/api/health';
     const response = await fetch(apiUrl);
     return response.ok;
   } catch {
     return false;
-  }
-};
-
-// Submit feedback for an audit
-export const submitFeedback = async (auditId: string, url: string, rating: number, feedback: string): Promise<{ success: boolean; message: string }> => {
-  try {
-    const apiUrl = API_BASE_URL
-      ? `${API_BASE_URL}/api/feedback`
-      : '/api/feedback';
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ auditId, url, rating, feedback }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to submit feedback');
-    }
-
-    return await response.json();
-  } catch (error: any) {
-    console.error('Feedback submission error:', error);
-    throw error;
-  }
-};
-
-// Get feedback for an audit
-export const getAuditFeedback = async (auditId: string): Promise<{ feedbacks: any[]; total: number }> => {
-  try {
-    const apiUrl = API_BASE_URL
-      ? `${API_BASE_URL}/api/feedback/${auditId}`
-      : `/api/feedback/${auditId}`;
-
-    const response = await fetch(apiUrl);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch feedback');
-    }
-
-    return await response.json();
-  } catch (error: any) {
-    console.error('Get feedback error:', error);
-    throw error;
   }
 };

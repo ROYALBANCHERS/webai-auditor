@@ -26,7 +26,7 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ setPage }) => {
     },
     {
       q: "Why is my score different from Lighthouse?",
-      a: "Lighthouse focuses heavily on performance metrics (Time to Interactive, LCP). Webai Auditor focuses on 'Bhai Logic'—UX feel, visual hierarchy, and code best practices that affect maintainability and user trust."
+      a: "Lighthouse focuses heavily on performance metrics (Time to Interactive, LCP). Webai Auditor focuses on real-world UX quality, visual hierarchy, and best practices that affect maintainability and user trust."
     }
   ];
 

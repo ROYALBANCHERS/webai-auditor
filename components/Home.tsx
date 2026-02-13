@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { AppState } from '../types';
 import { AdSpace } from './AdSpace';
 
 interface HomeProps {
-  onAudit: (url: string) => void;
+  onAudit: (url: string, credentials?: { username?: string; password?: string }) => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   const [url, setUrl] = useState('');
   const [isValid, setIsValid] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     document.title = "WebAI Auditor - Comprehensive Tech Stack Analysis";
@@ -24,7 +25,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (url.trim()) {
-      onAudit(url.trim());
+      onAudit(url.trim(), { username: username.trim(), password: password.trim() });
     }
   };
 
@@ -65,7 +66,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
         {/* URL Input Form */}
         <div className="w-full max-w-2xl">
           <div className="bg-white p-3 rounded-2xl border-2 border-gray-200 shadow-xl shadow-gray-100/50 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100 transition-all">
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <div className="flex-1 flex items-center px-4">
                 <svg className="w-5 h-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9 9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -77,6 +78,22 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
                   onChange={(e) => setUrl(e.target.value)}
                   className="flex-1 py-4 bg-transparent outline-none text-gray-800 placeholder-gray-400 text-lg w-full"
                   required
+                />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3 px-1">
+                <input
+                  type="text"
+                  placeholder="Optional login email/username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500"
+                />
+                <input
+                  type="password"
+                  placeholder="Optional login password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500"
                 />
               </div>
               <button
@@ -93,7 +110,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
             </form>
           </div>
           <p className="mt-4 text-sm text-gray-400">
-            Free • No signup • Results in 30 seconds
+            Optional credentials let us validate login-protected pages
           </p>
         </div>
 
