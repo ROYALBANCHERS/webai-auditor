@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Page } from '../types';
 
 interface FooterProps {
@@ -6,6 +6,10 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ setPage }) => {
+  const [currentLang, setCurrentLang] = useState('English');
+
+  const languages = ['English', 'EU', 'Chinese', 'Japanese'];
+
   return (
     <footer className="bg-white border-t border-gray-100 pt-16 pb-8 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,10 +22,23 @@ export const Footer: React.FC<FooterProps> = ({ setPage }) => {
             <p className="text-gray-500 text-sm leading-relaxed mb-4">
               Professional AI-powered website analysis. We identify missing code, UX failures, and help you build better web experiences.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 mb-4">
               <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">LinkedIn</a>
               <a href="#" className="text-gray-400 hover:text-pink-600 transition-colors">Instagram</a>
               <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Twitter</a>
+            </div>
+            {/* Language Selector */}
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-500 text-sm">Language:</span>
+              <select
+                value={currentLang}
+                onChange={(e) => setCurrentLang(e.target.value)}
+                className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                {languages.map((lang) => (
+                  <option key={lang} value={lang}>{lang}</option>
+                ))}
+              </select>
             </div>
           </div>
           
