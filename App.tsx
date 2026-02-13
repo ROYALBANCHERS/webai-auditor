@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Loader } from './components/Loader';
@@ -24,9 +24,14 @@ const App: React.FC = () => {
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Scroll to top whenever the page changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+
   const handleAudit = useCallback(async (url: string) => {
     setAppState(AppState.LOADING);
-    setCurrentPage(Page.HOME); // Ensure we are on home view to show loader/results
+    setCurrentPage(Page.HOME); 
     setError(null);
     try {
       const data = await auditWebsite(url);
@@ -43,10 +48,10 @@ const App: React.FC = () => {
     setAppState(AppState.IDLE);
     setResult(null);
     setError(null);
+    setCurrentPage(Page.HOME);
   }, []);
 
   const renderContent = () => {
-    // Page Routing
     switch (currentPage) {
       case Page.SERVICES: return <Services />;
       case Page.BLOGS: return <Blogs setPage={setCurrentPage} />;
@@ -62,7 +67,6 @@ const App: React.FC = () => {
       case Page.COOKIES: return <CookiePolicy setPage={setCurrentPage} />;
       case Page.HOME:
       default:
-        // Home logic handles loading/results states
         if (appState === AppState.LOADING) return <div className="py-32"><Loader /></div>;
         if (appState === AppState.RESULTS && result) return <Results result={result} onReset={handleReset} />;
         if (appState === AppState.ERROR) {
