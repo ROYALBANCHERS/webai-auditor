@@ -8,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') ||
 
 console.log('API Base URL:', API_BASE_URL || 'using relative path');
 
-export const auditWebsite = async (url: string, credentials?: { username: string; password: string }): Promise<AuditResult> => {
+export const auditWebsite = async (url: string, credentials?: { username: string; password: string }, language?: string): Promise<AuditResult> => {
   // Normalize URL
   const normalizedUrl = url.trim();
   if (!normalizedUrl) {
@@ -22,6 +22,7 @@ export const auditWebsite = async (url: string, credentials?: { username: string
   }
 
   console.log(`Starting audit for: ${fullUrl}`);
+  console.log(`Language: ${language || 'en'}`);
 
   // Try backend API first
   if (API_BASE_URL || !import.meta.env.PROD) {
@@ -40,7 +41,7 @@ export const auditWebsite = async (url: string, credentials?: { username: string
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: fullUrl, username: credentials?.username, password: credentials?.password }),
+        body: JSON.stringify({ url: fullUrl, username: credentials?.username, password: credentials?.password, language: language || 'en' }),
         signal: controller.signal,
       });
 
