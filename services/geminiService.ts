@@ -1,10 +1,10 @@
 import { AuditResult, AuditResultLegacy } from "../types";
 
 // API base URL - connect to Render backend
-// In production, set VITE_BACKEND_URL to your Render backend URL
-// Example: https://webai-auditor-backend.onrender.com
+// Default to production backend URL
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') ||
-                         import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
+                         import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ||
+                         'https://webai-auditor.onrender.com';
 
 console.log('API Base URL:', API_BASE_URL || 'using relative path');
 
