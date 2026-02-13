@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Loader } from './components/Loader';
@@ -26,6 +26,8 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [auditingUrl, setAuditingUrl] = useState<string>('');
   const [backendAvailable, setBackendAvailable] = useState<boolean>(false);
+  const [auditStartedAt, setAuditStartedAt] = useState<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
 
   // Check backend health on mount
   useEffect(() => {
@@ -39,20 +41,39 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
+
+  useEffect(() => {
+    if (!auditStartedAt || appState !== AppState.LOADING) return;
+
+    const interval = setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - auditStartedAt) / 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [auditStartedAt, appState]);
+
+  const estimatedTime = useMemo(() => {
+    const pages = result?.pages?.length || 8;
+    return Math.max(30, pages * 12);
+  }, [result?.pages?.length]);
+
   const handleAudit = useCallback(async (url: string) => {
     setAppState(AppState.LOADING);
     setCurrentPage(Page.HOME);
     setError(null);
     setAuditingUrl(url);
+    setAuditStartedAt(Date.now());
 
     try {
       const data = await auditWebsite(url);
       setResult(data);
       setAppState(AppState.RESULTS);
+      setAuditStartedAt(null);
     } catch (err: any) {
       console.error(err);
       setError(err?.message || "Something went wrong while checking the site. Try again?");
       setAppState(AppState.ERROR);
+      setAuditStartedAt(null);
     }
   }, []);
 
@@ -62,6 +83,8 @@ const App: React.FC = () => {
     setError(null);
     setCurrentPage(Page.HOME);
     setAuditingUrl('');
+    setAuditStartedAt(null);
+    setElapsedSeconds(0);
   }, []);
 
   const renderContent = () => {
@@ -87,6 +110,9 @@ const App: React.FC = () => {
               <Loader />
               <p className="text-center text-gray-500 mt-4">
                 Analyzing: {auditingUrl}
+              </p>
+              <p className="text-center text-sm text-gray-400 mt-2">
+                Elapsed: {elapsedSeconds}s • Estimated: ~{estimatedTime}s
               </p>
               {!backendAvailable && (
                 <p className="text-center text-orange-500 text-sm mt-2">

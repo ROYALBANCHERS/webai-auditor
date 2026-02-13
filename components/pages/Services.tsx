@@ -3,7 +3,7 @@ import { AdSpace } from '../AdSpace';
 
 export const Services: React.FC = () => {
   useEffect(() => {
-    document.title = "Services - Bhai Website Auditor";
+    document.title = "Services - WebAI Website Auditor";
   }, []);
 
   const services = [
