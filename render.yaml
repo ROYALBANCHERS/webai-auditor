@@ -1,0 +1,13 @@
+services:
+  # Web Service
+  - type: web
+    name: webai-auditor-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node backend/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8787
+    healthCheckPath: /api/health
