@@ -1,5 +1,16 @@
 # 🚀 Deploy Backend to Render - Quick Guide
 
+## About Auditor
+
+The WebAI Auditor now works like a **real human being**:
+- ✅ Visits EACH page individually
+- ✅ Runs 8 comprehensive analyses per page (SEO, Security, Performance, Accessibility, Mobile, UX, UI, Functionality)
+- ✅ Rates each page individually (0-5 stars)
+- ✅ Overall rating = average of all tested pages
+- ✅ Issues labeled with page path (e.g., "[About Page] Missing H1")
+
+---
+
 ## Method 1: Render Blueprint (Easiest - One Click)
 
 1. Copy this URL and open in browser:
