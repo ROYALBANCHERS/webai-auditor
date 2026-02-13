@@ -12,4 +12,6 @@ services:
         value: production
       - key: NODE_VERSION
         value: 20
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/cache/ms-playwright
     healthCheckPath: /api/health

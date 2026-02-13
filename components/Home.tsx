@@ -3,7 +3,7 @@ import { AppState } from '../types';
 import { AdSpace } from './AdSpace';
 
 interface HomeProps {
-  onAudit: (url: string, credentials?: { username: string; password: string }) => void;
+  onAudit: (url: string, credentials?: { username: string; password: string }, language?: string) => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ onAudit }) => {
@@ -11,10 +11,16 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   const [isValid, setIsValid] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [language, setLanguage] = useState<'en' | 'hi'>('en');
 
   useEffect(() => {
-    document.title = "WebAI Auditor - Comprehensive Tech Stack Analysis";
-  }, []);
+    // Get saved language preference
+    const savedLang = localStorage.getItem('preferred-language') as 'en' | 'hi' | null;
+    if (savedLang) {
+      setLanguage(savedLang);
+    }
+    document.title = language === 'hi' ? "WebAI ऑडिटर - व्यापक वेबसाइट विश्लेषण" : "WebAI Auditor - Comprehensive Tech Stack Analysis";
+  }, [language]);
 
   // Basic URL validation
   useEffect(() => {
@@ -23,10 +29,15 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
     setIsValid(url.length > 3 && (urlPattern.test(url) || isValidDomain.test(url)));
   }, [url]);
 
+  const handleLanguageChange = (lang: 'en' | 'hi') => {
+    setLanguage(lang);
+    localStorage.setItem('preferred-language', lang);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (url.trim()) {
-      onAudit(url.trim(), username && password ? { username, password } : undefined);
+      onAudit(url.trim(), username && password ? { username, password } : undefined, language);
     }
   };
 
@@ -40,28 +51,37 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
 
   return (
     <div className="animate-fade-in-up">
+      {/* Language Selector */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => handleLanguageChange(language === 'en' ? 'hi' : 'en')}
+          className="px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-md text-sm font-medium hover:bg-gray-50 transition-colors"
+        >
+          {language === 'en' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
+        </button>
+      </div>
+
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col items-center text-center">
         {/* Badge */}
         <div className="mb-8 flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100">
           <span className="text-2xl">🔍</span>
           <span className="text-blue-600 text-sm font-semibold uppercase tracking-wider">
-            Comprehensive Tech Stack Auditor
+            {language === 'hi' ? 'व्यापक वेबसाइट ऑडिटर' : 'Comprehensive Tech Stack Auditor'}
           </span>
         </div>
 
         {/* Main Heading */}
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-6 max-w-4xl leading-tight">
-          Analyze Any Website
+          {language === 'hi' ? 'किसी भी वेबसाइट का विश्लेषण करें' : 'Analyze Any Website'}
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-            Any Tech Stack
+            {language === 'hi' ? 'कोई भी टेक स्टैक' : 'Any Tech Stack'}
           </span>
         </h1>
 
         <p className="text-xl text-gray-500 font-light max-w-2xl mb-10 leading-relaxed">
-          Comprehensive technical analysis for websites built with ANY tech stack. Works with
-          React, Vue, Angular, Next.js, WordPress, Shopify, AI-generated sites (v0, Claude, Cursor), and more.
+          {language === 'hi' ? 'किसी भी टेक्नोलॉजी, लाइब्रेरी, या AI-जनरेटेड वेबसाइट की जांच करें।' : 'Comprehensive technical analysis for ANY tech stack.'}
         </p>
 
         {/* URL Input Form */}
