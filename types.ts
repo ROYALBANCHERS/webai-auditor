@@ -36,6 +36,15 @@ export interface AuditResult {
 
   // Advice
   advice: string;
+  summary?: string;
+  technical_analysis?: string[];
+
+  certificate?: {
+    issuedAt: string;
+    score: number;
+    grade: string;
+    summary: string;
+  } | null;
 
   // Detailed analysis results (NEW - Comprehensive Analysis)
   seoAnalysis?: AnalysisResult;
@@ -68,6 +77,12 @@ export interface PageAudit {
   errors?: string[];
   loadTime?: number;
   error?: string;
+  status?: number;
+  title?: string;
+  consoleErrors?: string[];
+  runtimeErrors?: string[];
+  buttonSummary?: { total: number; working: number; broken: number; details?: Array<{ text: string; disabled: boolean; hidden: boolean }> };
+  linkSummary?: { checked: number; broken: number };
 }
 
 export interface InteractiveTests {

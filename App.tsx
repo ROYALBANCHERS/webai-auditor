@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [auditingUrl, setAuditingUrl] = useState<string>('');
   const [backendAvailable, setBackendAvailable] = useState<boolean>(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
 
   // Check backend health on mount
   useEffect(() => {
@@ -39,14 +40,15 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
-  const handleAudit = useCallback(async (url: string) => {
+  const handleAudit = useCallback(async (url: string, credentials?: { username: string; password: string }) => {
     setAppState(AppState.LOADING);
     setCurrentPage(Page.HOME);
     setError(null);
     setAuditingUrl(url);
+    setElapsedSeconds(0);
 
     try {
-      const data = await auditWebsite(url);
+      const data = await auditWebsite(url, credentials);
       setResult(data);
       setAppState(AppState.RESULTS);
     } catch (err: any) {
@@ -55,6 +57,12 @@ const App: React.FC = () => {
       setAppState(AppState.ERROR);
     }
   }, []);
+
+  useEffect(() => {
+    if (appState !== AppState.LOADING) return;
+    const id = window.setInterval(() => setElapsedSeconds((v) => v + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [appState]);
 
   const handleReset = useCallback(() => {
     setAppState(AppState.IDLE);
@@ -86,7 +94,7 @@ const App: React.FC = () => {
             <div className="py-12">
               <Loader />
               <p className="text-center text-gray-500 mt-4">
-                Analyzing: {auditingUrl}
+                Analyzing: {auditingUrl} • Elapsed: {elapsedSeconds}s • Estimated: 60-180s
               </p>
               {!backendAvailable && (
                 <p className="text-center text-orange-500 text-sm mt-2">
