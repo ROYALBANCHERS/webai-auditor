@@ -2635,7 +2635,37 @@ const testAuthFlow = async (page, url) => {
       authResults.details.push(`Found ${mainPageAuth.loginFormCount} login form(s) on homepage`);
     }
 
-    if (mainPageAuth.hasSocialLogin) {
+    // Check for Pricing page
+    console.log('💰 Checking for Pricing page...');
+    const pricingLink = await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll('a[href]'));
+      const pricingLink = links.find(a => {
+        const href = (a.getAttribute('href') || '').toLowerCase();
+        const text = (a.textContent || '').toLowerCase();
+        // Check for pricing related keywords
+        return href.includes('pricing') || href.includes('price') || href.includes('plan') ||
+               text.includes('pricing') || text.includes('price') || text.includes('plan') ||
+               text.includes('₹') || text.includes('₹') || href.includes('pricing') ||
+               text.includes('₹') || text.includes('₹') || text.includes('pricing');
+      });
+      return pricingLink ? { href: pricingLink.getAttribute('href'), text: pricingLink.textContent } : null;
+    });
+
+    if (pricingLink && pricingLink.href) {
+      authResults.hasPricing = true;
+      authResults.pricingPageAccessible = true;
+      authResults.details.push(`Pricing page found: "${pricingLink.text}" (${pricingLink.href})`);
+    } else {
+      authResults.issues.push({
+        title: 'Pricing Page Not Found',
+        description: 'No pricing/plan page detected on the website.',
+        severity: 'medium',
+        category: 'Auth'
+      });
+    }
+
+    // Try to navigate to login page
+    if (mainPageAuth.loginLinkCount > 0) {
       authResults.details.push('Social login options available');
       authResults.socialLoginAvailable = true;
     }
