@@ -32,23 +32,18 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm run build
+        run: npm ci
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_BACKEND_URL: ${{ vars.VITE_BACKEND_URL }}
 
       - name: Add SPA fallback
         run: cp dist/index.html dist/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          static_site_path: /webai-auditor/
-          cname: webai-auditor.pages.dev
-
-      - name: Setup Build Env
-        run: |
-          echo "VITE_BACKEND_URL=${{VITE_BACKEND_URL}}" >> $GITHUB_ENV_SUFFIX
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
