@@ -12,4 +12,6 @@ services:
         value: production
       - key: PORT
         value: 8787
+      - key: NODE_VERSION
+        value: 20
     healthCheckPath: /api/health

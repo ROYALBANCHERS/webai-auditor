@@ -24,7 +24,7 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
   console.log(`Starting audit for: ${fullUrl}`);
 
   // Try backend API first
-  if (API_BASE_URL || !import.meta.env.PROD)) {
+  if (API_BASE_URL || !import.meta.env.PROD) {
     try {
       const apiUrl = API_BASE_URL
         ? `${API_BASE_URL}/api/audit`
