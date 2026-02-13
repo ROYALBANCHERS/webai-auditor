@@ -3,12 +3,14 @@ import { AppState } from '../types';
 import { AdSpace } from './AdSpace';
 
 interface HomeProps {
-  onAudit: (url: string) => void;
+  onAudit: (url: string, credentials?: { username: string; password: string }) => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   const [url, setUrl] = useState('');
   const [isValid, setIsValid] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     document.title = "WebAI Auditor - Comprehensive Tech Stack Analysis";
@@ -24,7 +26,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (url.trim()) {
-      onAudit(url.trim());
+      onAudit(url.trim(), username && password ? { username, password } : undefined);
     }
   };
 
@@ -93,8 +95,12 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
             </form>
           </div>
           <p className="mt-4 text-sm text-gray-400">
-            Free • No signup • Results in 30 seconds
+            Free • No signup • Real-browser checks with page-by-page reporting
           </p>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+            <input value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="Optional login username/email" className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm" />
+            <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Optional login password" className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm" />
+          </div>
         </div>
 
         {/* Example Sites */}

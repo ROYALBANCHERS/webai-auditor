@@ -30,7 +30,7 @@ app.post('/api/audit', async (req, res) => {
     console.log(`🔍 NEW AUDIT REQUEST: ${url}`);
     console.log(`${'='.repeat(60)}`);
 
-    const report = await auditWebsiteWithBrowser(url);
+    const report = await auditWebsiteWithBrowser(url, { username: req.body?.username, password: req.body?.password });
 
     // Store in history (in-memory for now)
     auditHistory.unshift({
@@ -51,7 +51,7 @@ app.post('/api/audit', async (req, res) => {
   } catch (error) {
     console.error('❌ Audit API Error:', error);
     return res.status(500).json({
-      error: 'Bhai audit karte time issue aa gaya. Thoda der baad try kar.',
+      error: 'Audit failed while scanning the website. Please try again shortly.',
       message: error.message
     });
   }
