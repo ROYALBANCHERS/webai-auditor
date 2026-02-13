@@ -11,7 +11,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
-    document.title = "WebAI Auditor - AI Powered Website Analysis";
+    document.title = "WebAI Auditor - Comprehensive Tech Stack Analysis";
   }, []);
 
   // Basic URL validation
@@ -42,24 +42,24 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col items-center text-center">
         {/* Badge */}
         <div className="mb-8 flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100">
-          <span className="text-2xl">🤖</span>
+          <span className="text-2xl">🔍</span>
           <span className="text-blue-600 text-sm font-semibold uppercase tracking-wider">
-            AI-Powered Website Auditor
+            Comprehensive Tech Stack Auditor
           </span>
         </div>
 
         {/* Main Heading */}
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-6 max-w-4xl leading-tight">
-          Check Your Website
+          Analyze Any Website
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-            Like a Real User
+            Any Tech Stack
           </span>
         </h1>
 
         <p className="text-xl text-gray-500 font-light max-w-2xl mb-10 leading-relaxed">
-          AI actually opens your website in a browser, clicks buttons, navigates pages,
-          and tells you exactly what's working and what's not. No chatbot — real browser testing.
+          Comprehensive technical analysis for websites built with ANY tech stack. Works with
+          React, Vue, Angular, Next.js, WordPress, Shopify, AI-generated sites (v0, Claude, Cursor), and more.
         </p>
 
         {/* URL Input Form */}
@@ -119,82 +119,104 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
         <AdSpace />
       </div>
 
-      {/* What AI Checks */}
+      {/* What We Check */}
       <div className="bg-white py-20 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              AI Kya Check Karta Hai?
+              Comprehensive Tech Stack Analysis
             </h2>
             <p className="text-xl text-gray-500 font-light">
-              Unlike GPT, this AI actually browses your website
+              Works with ANY framework, library, or AI-generated website
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="p-8 bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl border border-red-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
-                🔴
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Card 1 - SEO */}
+            <div className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl mb-4">
+                🔍
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Dead Buttons</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Jo button click nahi ho rahe, links jo broken hain — sab detect karta hai.
+              <h3 className="text-lg font-bold text-gray-900 mb-2">SEO Analysis</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Meta tags, headings structure, Open Graph, structured data, sitemap
               </p>
             </div>
 
-            {/* Card 2 */}
-            <div className="p-8 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl border border-yellow-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
-                😕
+            {/* Card 2 - Security */}
+            <div className="p-6 bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl border border-red-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl mb-4">
+                🔐
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Confusing UX</h3>
-              <p className="text-gray-600 leading-relaxed">
-                User ko kya karna hai clear nahi hai? Navigation confusing hai? Sab batata hai.
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Security Check</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                HTTPS, mixed content, exposed API keys, insecure forms
               </p>
             </div>
 
-            {/* Card 3 */}
-            <div className="p-8 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
-                📱
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Mobile Issues</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Phone pe site toot toh nahi rahi? Text readable hai ya nahi?
-              </p>
-            </div>
-
-            {/* Card 4 */}
-            <div className="p-8 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
-                🎨
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">UI Problems</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Cluttered design, poor color contrast, hidden elements — sab fix karo.
-              </p>
-            </div>
-
-            {/* Card 5 */}
-            <div className="p-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+            {/* Card 3 - Performance */}
+            <div className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl border border-yellow-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-2xl mb-4">
                 ⚡
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Slow Loading</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Page kitni der me load ho rahi hai? User wait karega ya chale jayega?
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Performance</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Load times, DOM complexity, image optimization, lazy loading
               </p>
             </div>
 
-            {/* Card 6 */}
-            <div className="p-8 bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+            {/* Card 4 - Accessibility */}
+            <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl mb-4">
                 ♿
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Accessibility</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Alt text missing hai? Screen reader ke liye problem? Sab check karta hai.
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Accessibility</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Alt text, ARIA labels, keyboard nav, color contrast, semantic HTML
+              </p>
+            </div>
+
+            {/* Card 5 - Mobile */}
+            <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl mb-4">
+                📱
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Mobile Ready</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Viewport settings, touch targets, responsive images, mobile menu
+              </p>
+            </div>
+
+            {/* Card 6 - UX */}
+            <div className="p-6 bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl mb-4">
+                👥
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">UX Review</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Navigation, CTAs, forms, dead links, user flow
+              </p>
+            </div>
+
+            {/* Card 7 - UI */}
+            <div className="p-6 bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl border border-pink-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center text-2xl mb-4">
+                🎨
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">UI Design</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Typography consistency, spacing, visual hierarchy, broken images
+              </p>
+            </div>
+
+            {/* Card 8 - Tech Stack */}
+            <div className="p-6 bg-gradient-to-br from-gray-50 to-slate-50 rounded-2xl border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-2xl mb-4">
+                🧱
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Tech Stack</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Frameworks, libraries, CMS, analytics, hosting detection
               </p>
             </div>
           </div>
@@ -206,16 +228,17 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Kaise Kaam Karta Hai?
+              How It Works
             </h2>
           </div>
 
           <div className="space-y-8">
             {[
-              { step: '1', icon: '🔗', title: 'URL Enter Karo', desc: 'Bas apni website ka URL daalo aur Audit button dabao.' },
-              { step: '2', icon: '🤖', title: 'AI Browser Me Open Kare', desc: 'Humara AI Playwright browser me site open karta hai — real user ki tarah.' },
-              { step: '3', icon: '🔍', title: 'Deep Analysis', desc: 'Buttons click karta hai, pages navigate karta hai, screenshots leta hai.' },
-              { step: '4', icon: '📊', title: 'Detailed Report', desc: 'Rating (out of 5), issues list, aur simple Hindi me advice milta hai.' },
+              { step: '1', icon: '🔗', title: 'Enter Your URL', desc: 'Simply enter your website URL and click the Audit button. Works with any website.' },
+              { step: '2', icon: '🤖', title: 'Browser Opens Your Site', desc: 'Our automated browser opens your site using Playwright — just like a real user.' },
+              { step: '3', icon: '🔍', title: 'Comprehensive Analysis', desc: 'Analyzes SEO, Security, Performance, Accessibility, Mobile, UX, UI, and Functionality.' },
+              { step: '4', icon: '🧱', title: 'Tech Stack Detection', desc: 'Detects all frameworks, libraries, CMS, and tools — works with any tech stack.' },
+              { step: '5', icon: '📊', title: 'Detailed Report', desc: 'Get a rating (out of 5), categorized issues, and actionable recommendations.' },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-6">
                 <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-black text-white flex items-center justify-center text-2xl font-bold">
@@ -226,7 +249,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
                     <span className="text-3xl">{item.icon}</span>
                     <h3 className="text-xl font-bold text-gray-900">{item.title}</h3>
                   </div>
-                  <p className="text-gray-600">{item.desc}</p>
+                  <p className="text-gray-600 text-sm">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -237,10 +260,10 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
       {/* CTA Section */}
       <div className="py-20 text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Ready to Audit Your Website?
+          Ready to Audit Any Website?
         </h2>
         <p className="text-xl text-gray-500 mb-8">
-          Completely free. No signup required.
+          Works with any tech stack — React, Vue, Angular, WordPress, Shopify, AI-generated sites, and more.
         </p>
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

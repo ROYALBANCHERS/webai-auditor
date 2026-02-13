@@ -3,20 +3,21 @@ import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Loader } from './components/Loader';
 import { Results } from './components/Results';
+import { LoginPage } from './components/pages/LoginPage';
 import { Services } from './components/pages/Services';
 import { Blogs } from './components/pages/Blogs';
 import { BlogPost } from './components/pages/BlogPost';
 import { AINews } from './components/pages/AINews';
 import { HowItWorks } from './components/pages/HowItWorks';
 import { Contact } from './components/pages/Contact';
-import { Pricing } from './components/pages/Pricing';
+import { Pricing } from './components/pages/Pricings';
 import { ApiDocs } from './components/pages/ApiDocs';
 import { HelpCenter } from './components/pages/HelpCenter';
 import { PrivacyPolicy } from './components/pages/PrivacyPolicy';
 import { TermsOfService } from './components/pages/TermsOfService';
 import { CookiePolicy } from './components/pages/CookiePolicy';
 import { AppState, AuditResult, Page } from './types';
-import { auditWebsite } from './services/geminiService';
+import { auditWebsite, checkBackendHealth } from './services/geminiService';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
@@ -24,6 +25,14 @@ const App: React.FC = () => {
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [auditingUrl, setAuditingUrl] = useState<string>('');
+  const [backendAvailable, setBackendAvailable] = useState<boolean>(false);
+
+  // Check backend health on mount
+  useEffect(() => {
+    checkBackendHealth().then(available => {
+      setBackendAvailable(available);
+    });
+  }, []);
 
   // Scroll to top whenever the page changes
   useEffect(() => {
@@ -69,6 +78,7 @@ const App: React.FC = () => {
       case Page.PRIVACY: return <PrivacyPolicy setPage={setCurrentPage} />;
       case Page.TERMS: return <TermsOfService setPage={setCurrentPage} />;
       case Page.COOKIES: return <CookiePolicy setPage={setCurrentPage} />;
+      case Page.LOGIN: return <LoginPage />;
       case Page.HOME:
       default:
         if (appState === AppState.LOADING) {
@@ -78,6 +88,11 @@ const App: React.FC = () => {
               <p className="text-center text-gray-500 mt-4">
                 Analyzing: {auditingUrl}
               </p>
+              {!backendAvailable && (
+                <p className="text-center text-orange-500 text-sm mt-2">
+                  ⚠️ Backend unavailable - showing demo results
+                </p>
+              )}
             </div>
           );
         }
@@ -98,10 +113,10 @@ const App: React.FC = () => {
                   Try Again
                 </button>
                 <button
-                  onClick={handleReset}
+                  onClick={() => setCurrentPage(Page.LOGIN)}
                   className="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl font-medium hover:border-gray-400 transition-colors"
                 >
-                  Different Website
+                  Test Login Page
                 </button>
               </div>
             </div>

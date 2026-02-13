@@ -1,4 +1,4 @@
-import { AuditResult } from "../types";
+import { AuditResult, AuditResultLegacy } from "../types";
 
 // API base URL - empty in prod (same origin), or set via env
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
@@ -19,7 +19,7 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
   console.log(`Starting audit for: ${fullUrl}`);
 
   // Try backend API first
-  if (API_BASE_URL || !import.meta.env.PROD) {
+  if (API_BASE_URL || !import.meta.env.PROD)) {
     try {
       const apiUrl = API_BASE_URL
         ? `${API_BASE_URL}/api/audit`
@@ -28,7 +28,7 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
       console.log(`Calling API: ${apiUrl}`);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -49,13 +49,50 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
       const data = await response.json();
       console.log('API response received:', data);
 
-      return data as AuditResult;
+      // Check if response has new format fields
+      if ('techStack' in data || 'pageAudits' in data || 'authTests' in data || 'screenshots' in data) {
+        // New format - already fully typed
+        return data as AuditResult;
+      }
+
+      // Legacy format - convert to new format
+      return {
+        ...data,
+        techStack: {
+          frameworks: [],
+          libraries: [],
+          analytics: [],
+          cms: [],
+          ecommerce: [],
+          fonts: []
+        },
+        pages: [],
+        pageAudits: [],
+        interactiveTests: {
+          buttons: { total: 0, clickable: 0, working: 0, broken: 0, details: [] },
+          forms: { total: 0, working: 0, broken: 0, details: [] },
+          links: { total: 0, working: 0, broken: 0, details: [] },
+          navigation: { hasNav: false, menuItems: 0, mobileMenuWorks: false, details: [] },
+          modals: { found: 0, closable: 0, details: [] }
+        }
+        authTests: {
+          hasLogin: false,
+          hasSignup: false,
+          loginPageAccessible: false,
+          signupPageAccessible: false,
+          socialLoginAvailable: false,
+          issues: [],
+          details: (data as AuditResultLegacy).technical_analysis || []
+        },
+        screenshots: {},
+        goodPoints: (data as AuditResultLegacy).highlights || []
+      };
     } catch (error: any) {
       console.error('API call failed:', error);
 
       // If it's an abort error, it's a timeout
       if (error.name === 'AbortError') {
-        throw new Error('Website took too long to respond. Try again or check if the site is online.');
+        throw new Error('Website took too long to respond. The audit is still running in the background. Please check back in a minute.');
       }
 
       // For network errors in production, show helpful message
@@ -71,27 +108,44 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
   return {
     url: fullUrl,
     auditDate: new Date().toISOString(),
-    loadTime: 2500,
-    summary: `Bhai ${fullUrl} ka audit complete kiya. Backend service connected nahi ho pa raha - demo mode me results aa rahe hain. Real ke liye backend start karo.`,
-    issues: [
-      {
-        title: 'Demo Mode',
-        description: 'Backend server is not connected. Start the backend server to get real AI-powered audits.',
-        severity: 'medium',
-        category: 'Functionality',
-      },
-    ],
-    technical_analysis: [
-      'Backend: Not Connected',
-      'Frontend: Working',
-      'Action: Start backend with `npm run dev:backend`',
-    ],
-    highlights: [
-      'Frontend is working',
-      'Ready to connect to backend',
-    ],
+    techStack: {
+      frameworks: [],
+      libraries: [],
+      analytics: [],
+      cms: [],
+      ecommerce: [],
+      fonts: []
+    },
+    pages: [],
+    pageAudits: [],
+    interactiveTests: {
+      buttons: { total: 0, clickable: 0, working: 0, broken: 0, details: [] },
+      forms: { total: 0, working: 0, broken: 0, details: [] },
+      links: { total: 0, working: 0, broken: 0, details: [] },
+      navigation: { hasNav: false, menuItems: 0, mobileMenuWorks: false, details: [] },
+      modals: { found: 0, closable: 0, details: [] }
+    },
+    authTests: {
+      hasLogin: false,
+      hasSignup: false,
+      loginPageAccessible: false,
+      signupPageAccessible: false,
+      socialLoginAvailable: false,
+      issues: [],
+      details: []
+    },
+    issues: [{
+      title: 'Demo Mode',
+      description: 'Backend server is not connected. Start the backend server to get real AI-powered audits.',
+      severity: 'medium',
+      category: 'Functionality'
+    }],
+    warnings: [],
+    goodPoints: ['Frontend is working', 'Ready to connect to backend'],
     rating: 3.5,
     advice: 'Backend server start karo: `npm run dev:backend`. Phir se audit try karo.',
+    screenshots: {},
+    loadTime: 0
   };
 };
 
@@ -106,5 +160,49 @@ export const checkBackendHealth = async (): Promise<boolean> => {
     return response.ok;
   } catch {
     return false;
+  }
+};
+
+// Submit feedback for an audit
+export const submitFeedback = async (auditId: string, url: string, rating: number, feedback: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    const apiUrl = API_BASE_URL
+      ? `${API_BASE_URL}/api/feedback`
+      : '/api/feedback';
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ auditId, url, rating, feedback }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to submit feedback');
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    console.error('Feedback submission error:', error);
+    throw error;
+  }
+};
+
+// Get feedback for an audit
+export const getAuditFeedback = async (auditId: string): Promise<{ feedbacks: any[]; total: number }> => {
+  try {
+    const apiUrl = API_BASE_URL
+      ? `${API_BASE_URL}/api/feedback/${auditId}`
+      : `/api/feedback/${auditId}`;
+
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch feedback');
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    console.error('Get feedback error:', error);
+    throw error;
   }
 };
