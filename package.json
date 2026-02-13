@@ -11,7 +11,8 @@
     "dev:frontend": "vite",
     "dev:backend": "node backend/server.js",
     "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "start:backend": "node backend/server.js"
+    "start:backend": "node backend/server.js",
+    "postinstall": "npx playwright install chromium || echo 'Playwright install skipped'"
   },
   "dependencies": {
     "@google/genai": "^1.41.0",
