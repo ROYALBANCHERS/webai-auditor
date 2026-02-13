@@ -52,7 +52,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   return (
     <div className="animate-fade-in-up">
       {/* Language Selector */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => handleLanguageChange(language === 'en' ? 'hi' : 'en')}
           className="px-4 py-2 bg-blue-600 text-white border-2 border-blue-700 rounded-lg shadow-lg text-sm font-semibold hover:bg-blue-700 transition-all flex items-center gap-2"
