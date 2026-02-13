@@ -1,9 +1,21 @@
 export interface AuditResult {
+  url?: string;
+  auditDate?: string;
+  loadTime?: number;
   summary: string;
-  issues: string[];
-  technical_analysis: string[]; // New field for code/button issues
+  issues: Issue[];
+  technical_analysis: string[];
   rating: number;
   advice: string;
+  highlights?: string[];
+  error?: string;
+}
+
+export interface Issue {
+  title: string;
+  description: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  category: 'UI' | 'UX' | 'Functionality' | 'Performance' | 'Accessibility' | 'SEO';
 }
 
 export enum AppState {

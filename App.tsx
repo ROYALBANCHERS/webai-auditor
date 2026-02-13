@@ -23,6 +23,7 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.HOME);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [auditingUrl, setAuditingUrl] = useState<string>('');
 
   // Scroll to top whenever the page changes
   useEffect(() => {
@@ -31,15 +32,17 @@ const App: React.FC = () => {
 
   const handleAudit = useCallback(async (url: string) => {
     setAppState(AppState.LOADING);
-    setCurrentPage(Page.HOME); 
+    setCurrentPage(Page.HOME);
     setError(null);
+    setAuditingUrl(url);
+
     try {
       const data = await auditWebsite(url);
       setResult(data);
       setAppState(AppState.RESULTS);
     } catch (err: any) {
       console.error(err);
-      setError("Something went wrong while checking the site. Try again?");
+      setError(err?.message || "Something went wrong while checking the site. Try again?");
       setAppState(AppState.ERROR);
     }
   }, []);
@@ -49,6 +52,7 @@ const App: React.FC = () => {
     setResult(null);
     setError(null);
     setCurrentPage(Page.HOME);
+    setAuditingUrl('');
   }, []);
 
   const renderContent = () => {
@@ -67,20 +71,39 @@ const App: React.FC = () => {
       case Page.COOKIES: return <CookiePolicy setPage={setCurrentPage} />;
       case Page.HOME:
       default:
-        if (appState === AppState.LOADING) return <div className="py-32"><Loader /></div>;
-        if (appState === AppState.RESULTS && result) return <Results result={result} onReset={handleReset} />;
+        if (appState === AppState.LOADING) {
+          return (
+            <div className="py-12">
+              <Loader />
+              <p className="text-center text-gray-500 mt-4">
+                Analyzing: {auditingUrl}
+              </p>
+            </div>
+          );
+        }
+        if (appState === AppState.RESULTS && result) {
+          return <Results result={result} onReset={handleReset} />;
+        }
         if (appState === AppState.ERROR) {
           return (
             <div className="text-center py-32 animate-fade-in">
-              <div className="text-red-500 text-6xl mb-4">☹️</div>
-              <h2 className="text-xl font-medium text-gray-900 mb-2">Error</h2>
-              <p className="text-gray-500 mb-6">{error}</p>
-              <button 
-                onClick={handleReset}
-                className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                Try Again
-              </button>
+              <div className="text-6xl mb-6">😔</div>
+              <h2 className="text-2xl font-medium text-gray-900 mb-2">Audit Failed</h2>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">{error}</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Try Again
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl font-medium hover:border-gray-400 transition-colors"
+                >
+                  Different Website
+                </button>
+              </div>
             </div>
           );
         }

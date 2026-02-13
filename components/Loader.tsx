@@ -1,17 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+const loadingMessages = [
+  "Website open ho rahi hai browser me...",
+  "Buttons aur links scan ho rahe hain...",
+  "Mobile view check ho raha hai...",
+  "AI analysis chal raha hai...",
+  "Issues detect kiye ja rahe hain...",
+  "Rating calculate ho rahi hai...",
+  "Bas thodi der aur...",
+];
 
 export const Loader: React.FC = () => {
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center animate-pulse">
-      <div className="relative w-16 h-16 mb-6">
-        <div className="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
-        <div className="absolute inset-0 border-4 border-black rounded-full border-t-transparent animate-spin"></div>
+    <div className="flex flex-col items-center justify-center py-20">
+      {/* Animated AI Brain */}
+      <div className="relative mb-8">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+          <div className="text-5xl animate-bounce">🧠</div>
+        </div>
+        {/* Orbiting dots */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-indigo-500 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-purple-500 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-pink-500 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
+        </div>
       </div>
-      <h2 className="text-xl font-medium text-gray-800 mb-2">
-        Analyzing pixels...
+
+      <h2 className="text-xl font-semibold text-gray-800 mb-3">
+        AI Website Auditor Chal Raha Hai
       </h2>
-      <p className="text-gray-500 font-light">
-        "Bhai website check ho rahi hai…"
+
+      {/* Progress Steps */}
+      <div className="flex flex-col items-center gap-2 mb-6">
+        {loadingMessages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`text-sm transition-all duration-500 ${
+              idx === messageIndex
+                ? 'text-black font-medium animate-fade-in'
+                : idx < messageIndex
+                ? 'text-green-600'
+                : 'text-gray-300'
+            }`}
+          >
+            {idx === messageIndex && '▸ '}
+            {idx < messageIndex && '✓ '}
+            {msg}
+          </div>
+        ))}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="w-64 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-1000 ease-out"
+          style={{
+            width: `${((messageIndex + 1) / loadingMessages.length) * 100}%`,
+          }}
+        />
+      </div>
+
+      <p className="text-gray-400 text-sm mt-6 italic">
+        "Bhai thoda sabr rakho, AI dheere se kaam kar raha hai..."
       </p>
     </div>
   );

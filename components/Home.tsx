@@ -8,55 +8,109 @@ interface HomeProps {
 
 export const Home: React.FC<HomeProps> = ({ onAudit }) => {
   const [url, setUrl] = useState('');
+  const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
-    document.title = "Webai Auditor - AI Powered Web Analysis";
+    document.title = "WebAI Auditor - AI Powered Website Analysis";
   }, []);
+
+  // Basic URL validation
+  useEffect(() => {
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    const isValidDomain = /^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}$/i;
+    setIsValid(url.length > 3 && (urlPattern.test(url) || isValidDomain.test(url)));
+  }, [url]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (url.trim()) {
-      onAudit(url);
+      onAudit(url.trim());
     }
   };
+
+  const exampleSites = [
+    'amazon.com',
+    'stripe.com',
+    'notion.so',
+    'apple.com',
+    'shopify.com',
+  ];
 
   return (
     <div className="animate-fade-in-up">
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 flex flex-col items-center text-center">
-        <span className="px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium uppercase tracking-wider mb-6">
-          AI-Powered Website Analysis
-        </span>
-        <h1 className="text-5xl md:text-6xl font-light tracking-tight text-gray-900 mb-6 max-w-4xl">
-          Check your website health with <br className="hidden md:block" />
-          <span className="font-semibold text-black">Webai Auditor Logic</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col items-center text-center">
+        {/* Badge */}
+        <div className="mb-8 flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100">
+          <span className="text-2xl">🤖</span>
+          <span className="text-blue-600 text-sm font-semibold uppercase tracking-wider">
+            AI-Powered Website Auditor
+          </span>
+        </div>
+
+        {/* Main Heading */}
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-6 max-w-4xl leading-tight">
+          Check Your Website
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            Like a Real User
+          </span>
         </h1>
+
         <p className="text-xl text-gray-500 font-light max-w-2xl mb-10 leading-relaxed">
-          Get a detailed audit of your UI, UX, and Code quality. Our AI identifies broken buttons, missing scripts, and gives you expert advice in simple language.
+          AI actually opens your website in a browser, clicks buttons, navigates pages,
+          and tells you exactly what's working and what's not. No chatbot — real browser testing.
         </p>
 
-        <div className="w-full max-w-lg">
-          <div className="bg-white p-2 rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50">
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                placeholder="Enter website URL (e.g., myshop.com)"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="flex-1 px-6 py-4 bg-transparent outline-none text-gray-800 placeholder-gray-400 text-lg font-light w-full"
-                required
-              />
+        {/* URL Input Form */}
+        <div className="w-full max-w-2xl">
+          <div className="bg-white p-3 rounded-2xl border-2 border-gray-200 shadow-xl shadow-gray-100/50 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100 transition-all">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 flex items-center px-4">
+                <svg className="w-5 h-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9 9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="example.com"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="flex-1 py-4 bg-transparent outline-none text-gray-800 placeholder-gray-400 text-lg w-full"
+                  required
+                />
+              </div>
               <button
                 type="submit"
-                className="px-8 py-4 bg-black text-white rounded-xl font-medium text-lg hover:bg-gray-800 transition-all duration-200 shadow-lg shadow-black/10 sm:w-auto w-full whitespace-nowrap"
+                disabled={!isValid}
+                className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 whitespace-nowrap ${
+                  isValid
+                    ? 'bg-black text-white hover:bg-gray-800 hover:scale-105 shadow-lg'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
               >
-                Start Audit
+                Audit Website
               </button>
             </form>
           </div>
-          <p className="mt-4 text-xs text-gray-400">
-            Try it now. It's free and fast.
+          <p className="mt-4 text-sm text-gray-400">
+            Free • No signup • Results in 30 seconds
           </p>
+        </div>
+
+        {/* Example Sites */}
+        <div className="mt-8">
+          <p className="text-xs text-gray-400 mb-3">Try with an example:</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {exampleSites.map((site) => (
+              <button
+                key={site}
+                onClick={() => setUrl(site)}
+                className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 transition-colors"
+              >
+                {site}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -65,39 +119,135 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
         <AdSpace />
       </div>
 
-      {/* Features Grid */}
-      <div className="bg-gray-50 py-24 mt-12">
+      {/* What AI Checks */}
+      <div className="bg-white py-20 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="p-8 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              AI Kya Check Karta Hai?
+            </h2>
+            <p className="text-xl text-gray-500 font-light">
+              Unlike GPT, this AI actually browses your website
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Card 1 */}
+            <div className="p-8 bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl border border-red-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                🔴
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Code Analysis</h3>
-              <p className="text-gray-500 font-light leading-relaxed">
-                We detect missing meta tags, deprecated HTML, and broken script references that slow down your site.
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Dead Buttons</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Jo button click nahi ho rahe, links jo broken hain — sab detect karta hai.
               </p>
             </div>
-            <div className="p-8 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-6">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.118 6.79L7.53 9.115m-4.876 4.876l2.897.777M2.239 16.812l2.897-.777m4.876 4.876l-2.415-2.415" /></svg>
+
+            {/* Card 2 */}
+            <div className="p-8 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl border border-yellow-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                😕
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">UX & Buttons</h3>
-              <p className="text-gray-500 font-light leading-relaxed">
-                Identify buttons that don't work, layout shifts, and mobile responsiveness issues before your users do.
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Confusing UX</h3>
+              <p className="text-gray-600 leading-relaxed">
+                User ko kya karna hai clear nahi hai? Navigation confusing hai? Sab batata hai.
               </p>
             </div>
-            <div className="p-8 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-6">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+
+            {/* Card 3 */}
+            <div className="p-8 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                📱
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Expert Advice</h3>
-              <p className="text-gray-500 font-light leading-relaxed">
-                Simple, actionable advice in plain language. No complex jargon, just straight facts to fix your site.
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Mobile Issues</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Phone pe site toot toh nahi rahi? Text readable hai ya nahi?
+              </p>
+            </div>
+
+            {/* Card 4 */}
+            <div className="p-8 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                🎨
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">UI Problems</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Cluttered design, poor color contrast, hidden elements — sab fix karo.
+              </p>
+            </div>
+
+            {/* Card 5 */}
+            <div className="p-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                ⚡
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Slow Loading</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Page kitni der me load ho rahi hai? User wait karega ya chale jayega?
+              </p>
+            </div>
+
+            {/* Card 6 */}
+            <div className="p-8 bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                ♿
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Accessibility</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Alt text missing hai? Screen reader ke liye problem? Sab check karta hai.
               </p>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* How It Works */}
+      <div className="bg-gray-50 py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Kaise Kaam Karta Hai?
+            </h2>
+          </div>
+
+          <div className="space-y-8">
+            {[
+              { step: '1', icon: '🔗', title: 'URL Enter Karo', desc: 'Bas apni website ka URL daalo aur Audit button dabao.' },
+              { step: '2', icon: '🤖', title: 'AI Browser Me Open Kare', desc: 'Humara AI Playwright browser me site open karta hai — real user ki tarah.' },
+              { step: '3', icon: '🔍', title: 'Deep Analysis', desc: 'Buttons click karta hai, pages navigate karta hai, screenshots leta hai.' },
+              { step: '4', icon: '📊', title: 'Detailed Report', desc: 'Rating (out of 5), issues list, aur simple Hindi me advice milta hai.' },
+            ].map((item) => (
+              <div key={item.step} className="flex items-start gap-6">
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-black text-white flex items-center justify-center text-2xl font-bold">
+                  {item.step}
+                </div>
+                <div className="flex-1 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-3xl">{item.icon}</span>
+                    <h3 className="text-xl font-bold text-gray-900">{item.title}</h3>
+                  </div>
+                  <p className="text-gray-600">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="py-20 text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          Ready to Audit Your Website?
+        </h2>
+        <p className="text-xl text-gray-500 mb-8">
+          Completely free. No signup required.
+        </p>
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="px-8 py-4 bg-black text-white rounded-xl font-semibold text-lg hover:bg-gray-800 transition-all hover:scale-105"
+        >
+          Start Free Audit
+        </button>
       </div>
     </div>
   );
