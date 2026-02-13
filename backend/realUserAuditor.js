@@ -2944,7 +2944,7 @@ const detectRealUserIssues = async (page, url) => {
 // MAIN AUDIT FUNCTION - Comprehensive Technical Analysis
 // Works with ANY tech stack - No AI dependency
 // ============================================
-export const auditWebsiteWithBrowser = async (inputUrl) => {
+export const auditWebsiteWithBrowser = async (inputUrl, language = 'en') => {
   const url = normalizeUrl(inputUrl);
   let browser;
 
@@ -2968,11 +2968,13 @@ export const auditWebsiteWithBrowser = async (inputUrl) => {
     mobileAnalysis: {},
     uxAnalysis: {},
     uiAnalysis: {},
-    functionalityAnalysis: {}
+    functionalityAnalysis: {},
+    language // Store selected language
   };
 
   try {
     console.log(`🔍 Starting COMPREHENSIVE TECH AUDIT for: ${url}`);
+    console.log(`🌐 Language: ${language === 'hi' ? 'हिंदी' : 'English'}`);
 
     browser = await chromium.launch({
       headless: true,

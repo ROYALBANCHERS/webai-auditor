@@ -20,6 +20,7 @@ app.get('/api/health', (_req, res) => {
 // Main audit endpoint
 app.post('/api/audit', async (req, res) => {
   const url = String(req.body?.url || '').trim();
+  const language = req.body?.language || 'en'; // Default to English if not specified
 
   if (!url) {
     return res.status(400).json({ error: 'URL is required.' });
@@ -28,9 +29,10 @@ app.post('/api/audit', async (req, res) => {
   try {
     console.log(`\n${'='.repeat(60)}`);
     console.log(`🔍 NEW AUDIT REQUEST: ${url}`);
+    console.log(`🌐 Language: ${language === 'hi' ? 'हिंदी' : 'English'}`);
     console.log(`${'='.repeat(60)}`);
 
-    const report = await auditWebsiteWithBrowser(url, { username: req.body?.username, password: req.body?.password });
+    const report = await auditWebsiteWithBrowser(url, { username: req.body?.username, password: req.body?.password }, language);
 
     // Store in history (in-memory for now)
     auditHistory.unshift({
