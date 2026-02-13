@@ -55,9 +55,10 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
       <div className="fixed top-4 right-4 z-50">
         <button
           onClick={() => handleLanguageChange(language === 'en' ? 'hi' : 'en')}
-          className="px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-md text-sm font-medium hover:bg-gray-50 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white border-2 border-blue-700 rounded-lg shadow-lg text-sm font-semibold hover:bg-blue-700 transition-all flex items-center gap-2"
         >
-          {language === 'en' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
+          {language === 'en' ? '🌐 English' : '🌐 हिंदी'}
+          <span>{language === 'en' ? 'EN' : 'HI'}</span>
         </button>
       </div>
 
