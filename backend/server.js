@@ -1,6 +1,6 @@
 import cors from 'cors';
 import express from 'express';
-import { auditWebsiteWithBrowser } from './realUserAuditor.js';
+import { auditWebsiteWithBrowser } from './websiteAuditor.js';
 
 const app = express();
 const port = process.env.PORT || 8787;
@@ -51,7 +51,7 @@ app.post('/api/audit', async (req, res) => {
   } catch (error) {
     console.error('❌ Audit API Error:', error);
     return res.status(500).json({
-      error: 'Bhai audit karte time issue aa gaya. Thoda der baad try kar.',
+      error: 'Audit failed while checking this website. Please try again in a moment.',
       message: error.message
     });
   }
@@ -141,17 +141,51 @@ app.get('/api/feedback/all', (req, res) => {
 app.post('/api/test-login', async (req, res) => {
   const { url, username, password } = req.body;
 
-  if (!url) {
-    return res.status(400).json({ error: 'URL is required.' });
+  if (!url || !username || !password) {
+    return res.status(400).json({ error: 'url, username and password are required.' });
   }
 
-  // This would be implemented with Playwright
-  // For now, return a placeholder response
-  res.json({
-    success: false,
-    message: 'Login testing feature coming soon! This will test actual login functionality.',
-    note: 'We will use the provided credentials to test if login works on the target site.'
-  });
+  try {
+    const { chromium } = await import('playwright');
+    const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const page = await browser.newPage();
+
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+    const userField = page.locator('input[type="email"], input[name*="user" i], input[name*="email" i], input[id*="user" i], input[id*="email" i]').first();
+    const passField = page.locator('input[type="password"]').first();
+
+    await userField.fill(String(username));
+    await passField.fill(String(password));
+
+    const submitBtn = page.locator('button[type="submit"], input[type="submit"], button:has-text("Sign in"), button:has-text("Login")').first();
+    if (await submitBtn.count()) {
+      await Promise.allSettled([
+        page.waitForLoadState('networkidle', { timeout: 10000 }),
+        submitBtn.click({ timeout: 5000 })
+      ]);
+    } else {
+      await passField.press('Enter');
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => null);
+    }
+
+    const currentUrl = page.url();
+    const stillOnLogin = /login|signin|auth/i.test(currentUrl);
+
+    await browser.close();
+
+    return res.json({
+      success: !stillOnLogin,
+      message: !stillOnLogin
+        ? `Login flow appears successful. Current page: ${currentUrl}`
+        : `Login may have failed or requires additional verification. Current page: ${currentUrl}`
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Login test failed: ${error.message}`
+    });
+  }
 });
 
 // Stats endpoint

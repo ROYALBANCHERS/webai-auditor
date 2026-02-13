@@ -79,7 +79,7 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
           links: { total: 0, working: 0, broken: 0, details: [] },
           navigation: { hasNav: false, menuItems: 0, mobileMenuWorks: false, details: [] },
           modals: { found: 0, closable: 0, details: [] }
-        }
+        },
         authTests: {
           hasLogin: false,
           hasSignup: false,
@@ -148,7 +148,7 @@ export const auditWebsite = async (url: string): Promise<AuditResult> => {
     warnings: [],
     goodPoints: ['Frontend is working', 'Ready to connect to backend'],
     rating: 3.5,
-    advice: 'Backend server start karo: `npm run dev:backend`. Phir se audit try karo.',
+    advice: 'Start the backend server with `npm run dev:backend`, then run the audit again.',
     screenshots: {},
     loadTime: 0
   };
