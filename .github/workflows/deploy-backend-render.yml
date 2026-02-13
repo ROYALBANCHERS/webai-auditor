@@ -1,0 +1,16 @@
+# To deploy backend to Render:
+# 1. Go to https://render.com
+# 2. Click "New +" -> "Web Service"
+# 3. Connect your GitHub: ROYALBANCHERS/webai-auditor
+# 4. Use these settings:
+#    - Name: webai-auditor-backend
+#    - Runtime: Node
+#    - Build Command: npm install
+#    - Start Command: node backend/server.js
+#    - Root Directory: leave empty
+# 5. Add Environment Variables:
+#    - NODE_ENV = production
+#    - PORT = 8787
+# 6. Click "Deploy Web Service"
+#
+# Render will auto-deploy on every push to main branch!
