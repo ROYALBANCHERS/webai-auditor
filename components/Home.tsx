@@ -199,11 +199,3 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
       </div>
     );
 };
-
-// Mobile‑first viewport fix for SEO
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="WebAI Auditor - Free website analysis tool. Audit any website for SEO, Security, Performance, Accessibility, Mobile, UX, and UI issues. Works with all tech stacks.">
-<meta name="keywords" content="website auditor, tech stack analysis, SEO checker, security scanner, performance test, accessibility checker">
-<meta property="og:title" content="WebAI Auditor">
-<meta property="og:description" content="Free technical website analysis tool.">
-<meta property="og:type" content="website">
