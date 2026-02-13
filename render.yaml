@@ -5,13 +5,11 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install && npx playwright install --with-deps chromium
+    buildCommand: npm install
     startCommand: node backend/server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: 20
-      - key: PLAYWRIGHT_BROWSERS_PATH
-        value: /opt/render/project/.cache/ms-playwright
     healthCheckPath: /api/health
