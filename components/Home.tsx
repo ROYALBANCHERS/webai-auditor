@@ -124,7 +124,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              AI Kya Check Karta Hai?
+              What Does AI Check?
             </h2>
             <p className="text-xl text-gray-500 font-light">
               Unlike GPT, this AI actually browses your website
@@ -139,7 +139,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Dead Buttons</h3>
               <p className="text-gray-600 leading-relaxed">
-                Jo button click nahi ho rahe, links jo broken hain — sab detect karta hai.
+                Detects unclickable buttons and broken links across your site.
               </p>
             </div>
 
@@ -150,7 +150,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Confusing UX</h3>
               <p className="text-gray-600 leading-relaxed">
-                User ko kya karna hai clear nahi hai? Navigation confusing hai? Sab batata hai.
+                Finds unclear user flows and confusing navigation patterns.
               </p>
             </div>
 
@@ -161,7 +161,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Mobile Issues</h3>
               <p className="text-gray-600 leading-relaxed">
-                Phone pe site toot toh nahi rahi? Text readable hai ya nahi?
+                Checks if your site breaks on phones and whether text is readable.
               </p>
             </div>
 
@@ -172,7 +172,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">UI Problems</h3>
               <p className="text-gray-600 leading-relaxed">
-                Cluttered design, poor color contrast, hidden elements — sab fix karo.
+                Highlights cluttered layouts, poor contrast, and hidden elements to fix.
               </p>
             </div>
 
@@ -183,7 +183,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Slow Loading</h3>
               <p className="text-gray-600 leading-relaxed">
-                Page kitni der me load ho rahi hai? User wait karega ya chale jayega?
+                Measures load speed and flags pages that may cause users to leave.
               </p>
             </div>
 
@@ -194,7 +194,7 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Accessibility</h3>
               <p className="text-gray-600 leading-relaxed">
-                Alt text missing hai? Screen reader ke liye problem? Sab check karta hai.
+                Checks missing alt text and potential screen-reader accessibility issues.
               </p>
             </div>
           </div>
@@ -206,16 +206,16 @@ export const Home: React.FC<HomeProps> = ({ onAudit }) => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Kaise Kaam Karta Hai?
+              How It Works
             </h2>
           </div>
 
           <div className="space-y-8">
             {[
-              { step: '1', icon: '🔗', title: 'URL Enter Karo', desc: 'Bas apni website ka URL daalo aur Audit button dabao.' },
-              { step: '2', icon: '🤖', title: 'AI Browser Me Open Kare', desc: 'Humara AI Playwright browser me site open karta hai — real user ki tarah.' },
-              { step: '3', icon: '🔍', title: 'Deep Analysis', desc: 'Buttons click karta hai, pages navigate karta hai, screenshots leta hai.' },
-              { step: '4', icon: '📊', title: 'Detailed Report', desc: 'Rating (out of 5), issues list, aur simple Hindi me advice milta hai.' },
+              { step: '1', icon: '🔗', title: 'Enter URL', desc: 'Enter your website URL and click the Audit button.' },
+              { step: '2', icon: '🤖', title: 'AI Opens in Browser', desc: 'Our AI opens your site in a Playwright browser, just like a real user.' },
+              { step: '3', icon: '🔍', title: 'Deep Analysis', desc: 'It clicks buttons, navigates pages, and captures screenshots.' },
+              { step: '4', icon: '📊', title: 'Detailed Report', desc: 'You get a 5-point rating, an issue list, and actionable recommendations.' },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-6">
                 <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-black text-white flex items-center justify-center text-2xl font-bold">

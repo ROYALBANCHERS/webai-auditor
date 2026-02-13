@@ -16,19 +16,18 @@ export const Pricing: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {/* Starter Plan - 25 Pages */}
+        {/* Starter Plan - 15 Pages */}
         <div className="p-8 border border-gray-100 rounded-2xl bg-white hover:border-gray-200 transition-colors">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Starter</h3>
           <div className="flex items-baseline mb-6">
-            <span className="text-4xl font-bold tracking-tight text-gray-900">$1</span>
-            <span className="text-gray-500 ml-1">/month</span>
+            <span className="text-4xl font-bold tracking-tight text-gray-900">Free</span>
           </div>
           <p className="text-gray-500 text-sm mb-6">Perfect for personal websites and small projects.</p>
 
           <ul className="space-y-3 mb-8">
             <li className="flex items-center text-gray-600 text-sm">
               <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Optimize <strong>25 pages</strong>
+              Optimize <strong>15 pages</strong>
             </li>
             <li className="flex items-center text-gray-600 text-sm">
               <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>

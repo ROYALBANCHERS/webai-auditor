@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
 const loadingMessages = [
-  "Website open ho rahi hai browser me...",
-  "Buttons aur links scan ho rahe hain...",
-  "Mobile view check ho raha hai...",
-  "AI analysis chal raha hai...",
-  "Issues detect kiye ja rahe hain...",
-  "Rating calculate ho rahi hai...",
-  "Bas thodi der aur...",
+  "Opening your website in a browser...",
+  "Scanning buttons and links...",
+  "Checking mobile responsiveness...",
+  "Running AI analysis...",
+  "Detecting issues...",
+  "Calculating quality rating...",
+  "Almost done...",
 ];
 
 export const Loader: React.FC = () => {
@@ -37,7 +37,7 @@ export const Loader: React.FC = () => {
       </div>
 
       <h2 className="text-xl font-semibold text-gray-800 mb-3">
-        AI Website Auditor Chal Raha Hai
+        AI Website Audit in Progress
       </h2>
 
       {/* Progress Steps */}
@@ -71,7 +71,7 @@ export const Loader: React.FC = () => {
       </div>
 
       <p className="text-gray-400 text-sm mt-6 italic">
-        "Bhai thoda sabr rakho, AI dheere se kaam kar raha hai..."
+        "Please wait a moment while the AI completes your audit..."
       </p>
     </div>
   );

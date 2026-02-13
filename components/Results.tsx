@@ -169,7 +169,7 @@ export const Results: React.FC<ResultsProps> = ({ result, onReset }) => {
                 💬 Share Your Feedback
               </h3>
               <p className="text-sm text-blue-700 mb-4">
-                Is this audit accurate? Did we miss something? Your feedback helps improve Bhai Auditor!
+                Is this audit accurate? Did we miss something? Your feedback helps improve Webai Auditor!
               </p>
               <div className="space-y-3">
                 <textarea
