@@ -1,15 +1,17 @@
 services:
   # Web Service
   - type: web
-    name: webai-auditor-backend
+    name: webai-auditor
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install && npx playwright install chromium
+    buildCommand: npm install && npx playwright install --with-deps chromium
     startCommand: node backend/server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: 20
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/.cache/ms-playwright
     healthCheckPath: /api/health
