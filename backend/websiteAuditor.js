@@ -225,12 +225,12 @@ const checkRandomLinks = async (page, baseUrl, limit = 5) => {
   const results = [];
 
   try {
-    const links = await page.evaluate(() => {
+    const links = await page.evaluate((maxLinks) => {
       return Array.from(document.querySelectorAll('a[href]'))
         .map(a => ({ href: a.getAttribute('href'), text: a.textContent?.trim() }))
         .filter(l => l.href && !l.href.startsWith('javascript:') && !l.href.startsWith('#') && !l.href.startsWith('mailto:'))
-        .slice(0, limit);
-    });
+        .slice(0, maxLinks);
+    }, limit);
 
     for (const link of links) {
       try {
