@@ -1,110 +1,164 @@
-# Bhai Website Auditor
+# 🌐 WebAI Auditor - Comprehensive Tech Stack Analysis
 
-AI Website Auditor jo website ko real browser me run karke UX/UI + functionality audit karta hai, phir simple Hinglish me result deta hai.
+A powerful website auditor that works with **ANY** tech stack - React, Vue, Angular, Next.js, WordPress, Shopify, AI-generated sites (v0, Claude, Cursor), and more.
 
-## Blank page issue (root cause + fix)
-Aapke GitHub Pages URL par blank page ka main reason usually ye hota hai:
-1. Vite project build serve nahi ho raha (source files serve ho rahe hote hain, jaise `/index.tsx`).
-2. Project repo path ke hisaab se `base` path configure nahi hota.
+**No AI dependency required** - pure technical analysis using Playwright browser automation.
 
-Is repo me dono fix add kar diye gaye:
-- Vite production base path configured (`/webai-auditor/`).
-- GitHub Actions workflow added jo `dist/` build ko direct Pages par deploy karta hai.
-- SPA fallback `404.html` bhi generate hota hai, taaki refresh pe blank/404 issue na aaye.
+## ✨ Features
 
-## Architecture
+- 🔍 **SEO Analysis** - Meta tags, headings, Open Graph, structured data
+- 🔐 **Security Check** - HTTPS, mixed content, API keys exposure
+- ⚡ **Performance** - Load times, DOM complexity, image optimization
+- ♿ **Accessibility** - Alt text, ARIA labels, keyboard navigation
+- 📱 **Mobile Ready** - Viewport, touch targets, responsive design
+- 👥 **UX Review** - Navigation, CTAs, forms, user flow
+- 🎨 **UI Design** - Typography, spacing, visual hierarchy
+- ⚙️ **Functionality** - Working forms, links, videos
+- 🧱 **Tech Stack Detection** - All frameworks, libraries, CMS, analytics
 
-### Frontend (Vite + React)
-- URL input + loading + results view
-- Calls backend endpoint: `POST /api/audit`
-
-### Backend (Express + Playwright + Gemini)
-- Opens website in Playwright Chromium
-- Collects real page signals (buttons, links, meta, etc.)
-- Generates Bhai-style audit response via Gemini
-- If Playwright/Gemini unavailable: heuristic fallback
-
-## Local development
-
-## Why your GitHub Pages site was blank
-GitHub Pages project URL (`https://<user>.github.io/webai-auditor/`) par Vite app blank isliye aa rahi thi kyunki production assets root path (`/assets/...`) se load ho rahe the. Ab Vite `base` properly `/webai-auditor/` set hai, to Pages par JS/CSS resolve ho jayega.
-
-## Architecture
+## 🏗️ Architecture
 
 ### Frontend (Vite + React)
 - URL input + loading + results view
-- Calls backend endpoint: `POST /api/audit`
-- Deploy target: GitHub Pages / Vercel / Netlify
+- Calls backend API for comprehensive audits
 
-### Backend (Express + Playwright + Gemini)
-- Opens website in Playwright Chromium
-- Collects real page signals (buttons, links, meta, etc.)
-- Generates Bhai-style audit response via Gemini
-- If `GEMINI_API_KEY` missing: falls back to heuristic report
+### Backend (Express + Playwright)
+- Opens websites in real Chromium browser
+- Collects 100+ technical signals
+- No AI/LLM dependency - pure analysis
 
-## Local development
+## 🚀 Quick Start
 
-### 1) Install
+### Local Development
+
+1. **Install dependencies**
 ```bash
 npm install
 ```
 
-### 2) Environment
-Create `.env` (or shell env):
+2. **Configure environment** (optional)
+Create `.env` file:
 ```bash
-GEMINI_API_KEY=your_key_here
 VITE_BACKEND_URL=http://localhost:8787
 ```
 
-### 3) Run full stack
+3. **Run full stack**
 ```bash
 npm run dev:full
 ```
-- Frontend: `http://localhost:3000`
+- Frontend: `http://localhost:5173`
 - Backend: `http://localhost:8787`
 
-## Production deployment
+### Run separately
+
+```bash
+# Frontend only
+npm run dev:frontend
+
+# Backend only
+npm run dev:backend
+```
+
+## 📦 Deployment
 
 ### Frontend on GitHub Pages
-1. Build frontend:
-```bash
-npm run build
+
+Already configured! Just push to `main` branch.
+
+### Backend on Render
+
+1. Go to [render.com](https://render.com)
+2. Click "New +" → "Web Service"
+3. Connect GitHub repo: `ROYALBANCHERS/webai-auditor`
+4. Configure:
+   - **Runtime**: Node
+   - **Build Command**: `npm install`
+   - **Start Command**: `node backend/server.js`
+5. Add Environment Variables:
+   - `NODE_ENV` = `production`
+   - `PORT` = `8787`
+6. Deploy!
+
+**Or use Blueprint:**
 ```
-2. Deploy `dist/` to GitHub Pages branch/workflow.
-
-> `vite.config.ts` already sets `base: '/webai-auditor/'` for production.
-
-### Backend on Render/Railway/Fly.io
-Start command:
-```bash
-npm run start:backend
-```
-Set env:
-- `PORT`
-- `GEMINI_API_KEY`
-
-Then point frontend to backend:
-```bash
-VITE_API_BASE_URL=https://your-backend-domain.com
+https://render.com/blueprint?url=https://github.com/ROYALBANCHERS/webai-auditor/blob/main/render.yaml
 ```
 
-## API
+After deployment, update frontend `VITE_BACKEND_URL`:
+```bash
+VITE_BACKEND_URL=https://your-backend.onrender.com
+```
+
+## 📡 API Endpoints
 
 ### `GET /api/health`
-Health check.
+Health check endpoint.
 
 ### `POST /api/audit`
-Body:
-```json
-{ "url": "https://example.com" }
-```
-Returns:
+Main audit endpoint.
+
+**Request:**
 ```json
 {
-  "summary": "Bhai ...",
-  "issues": ["..."],
-  "technical_analysis": ["..."],
-  "rating": 3.75,
+  "url": "https://example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "url": "https://example.com",
+  "rating": 4.2,
+  "techStack": {
+    "frameworks": ["React", "Next.js"],
+    "libraries": ["Tailwind CSS"],
+    "analytics": ["Google Analytics"],
+    "cms": [],
+    "ecommerce": []
+  },
+  "issues": [
+    {
+      "title": "Missing Meta Description",
+      "description": "...",
+      "severity": "high",
+      "category": "SEO"
+    }
+  ],
+  "seoAnalysis": { "issues": [], "goodPoints": [] },
+  "securityAnalysis": { "issues": [], "goodPoints": [] },
+  "performanceAnalysis": { "issues": [], "goodPoints": [] },
+  "accessibilityAnalysis": { "issues": [], "goodPoints": [] },
+  "mobileAnalysis": { "issues": [], "goodPoints": [] },
+  "uxAnalysis": { "issues": [], "goodPoints": [] },
+  "uiAnalysis": { "issues": [], "goodPoints": [] },
+  "functionalityAnalysis": { "issues": [], "goodPoints": [] },
+  "screenshots": {
+    "desktop": "base64...",
+    "mobile": "base64..."
+  },
   "advice": "..."
 }
 ```
+
+### `POST /api/feedback`
+Submit feedback on audit results.
+
+### `GET /api/audits`
+Get audit history.
+
+### `GET /api/stats`
+Get analytics and statistics.
+
+## 🛠️ Tech Stack Detection
+
+Detects:
+- **Frameworks**: React, Vue, Angular, Svelte, SolidJS, Next.js, Nuxt, Remix, Gatsby, Astro, SvelteKit
+- **Libraries**: Bootstrap, Tailwind, jQuery, MUI, Chakra, Ant Design, styled-components
+- **Build Tools**: Vite, Webpack, Parcel, esbuild, Rollup
+- **Hosting**: Vercel, Netlify, Cloudflare, Firebase, AWS
+- **CMS**: WordPress, Shopify, Squarespace, Wix, Webflow
+- **Analytics**: GA4, GTM, Facebook Pixel, Mixpanel, Amplitude, Hotjar
+
+## 📝 License
+
+MIT
